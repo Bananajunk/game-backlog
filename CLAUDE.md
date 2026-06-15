@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`Backlog` is a mobile-first, **local-first** video-game backlog tracker. The repo currently holds only the project foundation and a marketing landing page — the tracker app itself is not built yet. Planned capabilities: a FIFO backlog queue, multiple "currently playing" games across platforms, completed/dropped history, a chain/timeline view, and manual next-game selection.
+`Backlog` is a mobile-first, **local-first** video-game backlog tracker. The repo holds the project foundation, a marketing landing page at `/`, and a placeholder app shell at `/app` (`src/pages/app/index.astro`) — the tracker features themselves are not built yet. Planned capabilities: a FIFO backlog queue, multiple "currently playing" games across platforms, completed/dropped history, a chain/timeline view, and manual next-game selection.
 
 ## Commands
 
@@ -21,7 +21,7 @@ There is **no test framework** wired up; `astro check` is the only automated gat
 
 - **No React, no UI framework, no client-side router/state library.** The landing page ships **zero client JS**. Use Astro components; reach for a vanilla Web Component only where genuine interactivity is later required.
 - **No backend, auth, database, or external API** (no IGDB / IsThereAnyDeal) yet. The app is local-first by design.
-- The two landing CTAs (`Start Tracking`, `View Demo`) are placeholders that scroll to `#preview` — there is no app route yet.
+- The two landing CTAs (`Start Tracking`, `View Demo`) are placeholders that scroll to `#preview`. The `/app` route now exists as a bare placeholder shell, but the CTAs still point to `#preview` — wire `Start Tracking` to `/app` only once the tracker is usable.
 
 ## Architecture & conventions
 
