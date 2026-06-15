@@ -2,9 +2,9 @@
 
 > Finish more games. Start fewer by accident.
 
-A mobile-first, **local-first** game backlog tracker. This repository currently
-contains the project foundation and a polished marketing landing page — the
-tracker app itself comes next.
+A mobile-first, **local-first** game backlog tracker. This repository contains
+the project foundation, a polished marketing landing page, and a placeholder
+app shell at `/app` — the tracker features themselves come next.
 
 The eventual app will let players:
 
@@ -61,7 +61,9 @@ backlog/
     │   ├── FeatureCard.astro    # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
-        └── index.astro     # the landing page (hero, features, preview, footer)
+        ├── index.astro     # the landing page (hero, features, preview, footer)
+        └── app/
+            └── index.astro # the app shell (placeholder; the /app route)
 ```
 
 ## Theming
@@ -89,7 +91,8 @@ accent rationed to the live game node and the primary CTA.
 
 ## What's intentionally not here yet
 
-No database, auth, API integrations, routing, or state management. No IGDB or
-IsThereAnyDeal integration. The two landing-page CTAs are placeholders that
-scroll to the in-page preview; they'll point at the real app route once it
-ships.
+No database, auth, API integrations, or state management, and no client-side
+router (routes are plain Astro pages). No IGDB or IsThereAnyDeal integration.
+The `/app` route is currently a bare placeholder shell; the two landing-page
+CTAs still scroll to the in-page preview and will point at the app once the
+tracker is usable.
