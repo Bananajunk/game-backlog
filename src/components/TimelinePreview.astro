@@ -1,0 +1,106 @@
+---
+// Static, non-interactive mock of the planned chain/timeline UI.
+// Pure HTML/CSS — the rail, nodes and branch are drawn with CSS only (no SVG,
+// no client JS). Status is conveyed four ways at once — marker SHAPE, a GLYPH,
+// a text LABEL, and colour — so nothing depends on colour alone.
+
+const completed = [
+  { title: "Hades", time: "63h" },
+  { title: "Celeste", time: "28h" },
+];
+
+const backlog = [
+  { title: "Silksong", time: "Wishlist" },
+  { title: "Pikmin 4", time: "Switch" },
+  { title: "Metaphor: ReFantazio", time: "PS5" },
+];
+---
+
+<div class="device" role="img" aria-label="Preview of the Backlog app showing two completed games, two games currently being played, and three games queued in the backlog, connected by a vertical chain.">
+  <div class="device-bar">
+    <span class="text-sm font-medium text-ink">Backlog</span>
+    <span class="num text-ink-muted" style="font-size: 0.6875rem;">3 in queue</span>
+  </div>
+
+  <ol class="timeline" aria-hidden="true">
+    <!-- Completed (above) -->
+    {
+      completed.map((g) => (
+        <li class="t-row" data-status="completed">
+          <span class="t-node"></span>
+          <p class="t-title">{g.title}</p>
+          <div class="t-meta">
+            <span class="status-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              Completed
+            </span>
+            <span class="t-time num">{g.time}</span>
+          </div>
+        </li>
+      ))
+    }
+
+    <!-- Currently playing (center) with a branch implying a second active game -->
+    <li class="t-row" data-status="playing">
+      <span class="t-node"></span>
+      <p class="kicker" style="margin-bottom: 4px;">Playing now · <span class="num">2</span></p>
+      <p class="t-title">Elden Ring</p>
+      <div class="t-meta">
+        <span class="status-chip">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+          Playing
+        </span>
+        <span class="t-time num">PC · 41h</span>
+      </div>
+
+      <div class="t-branch">
+        <span class="t-node"></span>
+        <p class="t-title">Balatro</p>
+        <div class="t-meta">
+          <span class="status-chip">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+            Playing
+          </span>
+          <span class="t-time num">Switch · 12h</span>
+        </div>
+      </div>
+    </li>
+
+    <!-- Backlog (below) -->
+    {
+      backlog.map((g) => (
+        <li class="t-row" data-status="backlog">
+          <span class="t-node"></span>
+          <p class="t-title">{g.title}</p>
+          <div class="t-meta">
+            <span class="status-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z" /></svg>
+              Backlog
+            </span>
+            <span class="t-time num">{g.time}</span>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<!-- Shape legend: documents the marker language so it reads without colour. -->
+<ul class="mx-auto mt-6 flex max-w-md flex-wrap items-center justify-center gap-x-5 gap-y-3 text-ink-dim">
+  <li class="status-chip" style="color: var(--color-status-completed);">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2.5" /></svg>
+    Completed
+  </li>
+  <li class="status-chip" style="color: var(--color-status-playing);">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="currentColor" /></svg>
+    Playing
+  </li>
+  <li class="status-chip" style="color: var(--color-status-backlog);">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3" /></svg>
+    Backlog
+  </li>
+  <li class="status-chip" style="color: var(--color-status-dropped);">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2.5" /></svg>
+    Dropped
+  </li>
+</ul>

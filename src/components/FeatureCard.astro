@@ -1,0 +1,21 @@
+---
+interface Props {
+  /** Card heading (rendered as an <h3>). */
+  title: string;
+  /** One-line supporting description. */
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<article class="card flex flex-col gap-3 p-5">
+  <span
+    class="inline-flex h-10 w-10 items-center justify-center rounded-chip border border-line text-accent"
+    aria-hidden="true"
+  >
+    <slot name="icon" />
+  </span>
+  <h3 class="text-[0.9375rem] text-ink">{title}</h3>
+  <p class="text-sm leading-relaxed text-ink-dim">{description}</p>
+</article>

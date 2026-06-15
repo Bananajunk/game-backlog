@@ -1,0 +1,398 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Theme tokens — "Restrained Neon Arcade"
+   Declared with Tailwind v4's @theme so each token is BOTH a real CSS custom
+   property in :root AND a generated utility (bg-bg, text-ink, border-line, …).
+   Contrast verified against WCAG 2.1 AA: every text pair clears 4.5:1 and
+   every status/accent UI element clears 3:1. Borders and the surface→elevated
+   lift sit below 3:1 on purpose — they are decorative and never the sole
+   carrier of meaning, so depth is always reinforced by a hairline border.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Canvas & surfaces (near-black, cool-neutral) */
+  --color-bg: #0a0b0e;
+  --color-surface: #101216;
+  --color-elevated: #161922;
+
+  /* Borders — decorative only */
+  --color-line: #23262e;
+  --color-line-strong: #2a3340;
+
+  /* Text */
+  --color-ink: #f4f6fa; /* primary  — 18.19:1 on bg */
+  --color-ink-dim: #c6ccd6; /* secondary — 10.87:1 on elevated */
+  --color-ink-muted: #aeb6c2; /* muted     —  8.58:1 on elevated */
+
+  /* Accent — rationed to the live node, the co-play branch dot, and the CTA */
+  --color-accent: #2be3a7;
+  --color-accent-hover: #3ff0b6;
+  --color-accent-ink: #03130d; /* text on accent — 11.47:1 */
+  --color-focus: #5debc0;
+
+  /* Interactive-control boundary. Unlike the decorative borders above, this
+     must identify a clickable control, so it meets WCAG 1.4.11 non-text
+     contrast (>=3:1) against the page, the control fill, and the hover fill. */
+  --color-control-border: #697282; /* 4.06:1 on bg, 3.40:1 on hover fill */
+
+  /* Status — encoded by SHAPE + GLYPH + LABEL first, colour last */
+  --color-status-completed: #9cc0e8;
+  --color-status-playing: #2be3a7;
+  --color-status-backlog: #aeb6c2;
+  --color-status-dropped: #9aa2ae;
+
+  /* Radii */
+  --radius-frame: 22px;
+  --radius-card: 18px;
+  --radius-chip: 11px;
+
+  /* The single saturated effect on the page */
+  --shadow-glow-live: 0 0 12px rgba(43, 227, 167, 0.7);
+  --shadow-glow-cta: 0 0 16px rgba(43, 227, 167, 0.4);
+
+  /* Type families — system / web-safe only, zero web-font dependency */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
+    monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 500;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  /* Visible focus on every interactive element. Not animated, so it survives
+     reduced-motion. outline-offset gives the spec's "ring with a gap" look. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Numeric metadata: monospaced, figures aligned like an instrument readout. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Small uppercase kicker — the only uppercase in the system. */
+  .kicker {
+    font-size: 0.6875rem; /* 11px */
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Components
+--------------------------------------------------------------------------- */
+@layer components {
+  /* Skip link — visually hidden until focused. */
+  .skip-link {
+    position: absolute;
+    left: 12px;
+    top: -100px;
+    z-index: 50;
+    padding: 10px 14px;
+    border-radius: var(--radius-chip);
+    background-color: var(--color-elevated);
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-ink);
+    transition: top 150ms ease;
+  }
+  .skip-link:focus {
+    top: 12px;
+  }
+
+  /* Buttons / CTAs ------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 13px 20px;
+    border-radius: var(--radius-chip);
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-ink);
+    box-shadow: var(--shadow-glow-cta);
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+    box-shadow: 0 0 20px rgba(43, 227, 167, 0.55);
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-elevated);
+    color: var(--color-ink);
+    border-color: var(--color-control-border);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .btn-secondary:hover {
+    background-color: #1b1f29;
+    border-color: #828c9d; /* 5.80:1 on bg, 4.85:1 on hover fill */
+  }
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  /* Cards ---------------------------------------------------------------- */
+  .card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  /* Status chip (glyph + label) — the legible, color-independent status. */
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem; /* 12px */
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .status-chip svg {
+    width: 13px;
+    height: 13px;
+    flex: none;
+  }
+
+  /* ---------------------------------------------------------------------
+     Timeline preview — pure CSS, zero SVG for the rail/nodes/branch.
+     Marker SHAPE + the row's text status chip carry the meaning; the
+     coloured markers are decorative (aria-hidden).
+  --------------------------------------------------------------------- */
+  .timeline {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 30px;
+  }
+  /* The rail runs the full height behind every row. */
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background-color: var(--color-line-strong);
+    border-radius: 2px;
+  }
+
+  .t-row {
+    position: relative;
+    min-height: 44px;
+    padding: 10px 0;
+  }
+  .t-row + .t-row {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .t-title {
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .t-row[data-status="completed"] .t-title,
+  .t-row[data-status="dropped"] .t-title {
+    color: var(--color-ink-dim);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .t-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 5px;
+  }
+  .t-time {
+    font-size: 0.6875rem; /* 11px */
+    color: var(--color-ink-muted);
+  }
+
+  /* Node markers — shape is the primary signal.
+     Rules target the row's DIRECT-child marker only (`> .t-node`) so a nested
+     branch node keeps its own styling instead of inheriting the primary's. */
+  .t-node {
+    position: absolute;
+    box-sizing: border-box;
+    background-color: var(--color-bg);
+  }
+  /* Completed: hollow circle */
+  .t-row[data-status="completed"] > .t-node {
+    left: -25px;
+    top: 16px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--color-status-completed);
+  }
+  /* Playing (live): filled circle + the only glow on the rail */
+  .t-row[data-status="playing"] > .t-node {
+    left: -26px;
+    top: 15px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--color-status-playing);
+    box-shadow: var(--shadow-glow-live);
+  }
+  /* Backlog: dashed square */
+  .t-row[data-status="backlog"] > .t-node {
+    left: -25px;
+    top: 16px;
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    border: 2px dashed var(--color-status-backlog);
+  }
+  /* Dropped: solid-thin-border square */
+  .t-row[data-status="dropped"] > .t-node {
+    left: -25px;
+    top: 16px;
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    border: 2px solid var(--color-status-dropped);
+  }
+
+  /* Status chip colours (paired with shape + glyph + label) */
+  .t-row[data-status="completed"] .status-chip {
+    color: var(--color-status-completed);
+  }
+  .t-row[data-status="playing"] .status-chip {
+    color: var(--color-status-playing);
+  }
+  .t-row[data-status="backlog"] .status-chip {
+    color: var(--color-status-backlog);
+  }
+  .t-row[data-status="dropped"] .status-chip {
+    color: var(--color-status-dropped);
+  }
+
+  /* Branch — implies a second currently-playing game.
+     A CSS elbow drops from the main rail and turns right to the co-play node,
+     so the second game reads as branching off the live game above it. */
+  .t-branch {
+    position: relative;
+    margin-top: 14px;
+    padding-left: 16px;
+  }
+  .t-branch::before {
+    content: "";
+    position: absolute;
+    left: -21px; /* aligns the vertical run with the main rail (~x9) */
+    top: -16px; /* reaches up toward the live node above */
+    width: 22px;
+    height: 30px;
+    border-left: 2px solid var(--color-line-strong);
+    border-bottom: 2px solid var(--color-line-strong);
+    border-bottom-left-radius: 10px;
+  }
+  .t-branch > .t-node {
+    left: -5px; /* sits at the elbow's outer corner, off the rail */
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-status-playing);
+    box-shadow: 0 0 9px rgba(43, 227, 167, 0.55);
+  }
+  .t-branch .t-title {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  /* Phone frame around the preview — makes the mock read as the real app. */
+  .device {
+    width: 100%;
+    max-width: 360px;
+    margin-inline: auto;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-frame);
+    padding: 14px;
+  }
+  .device-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px 14px;
+    border-bottom: 1px solid var(--color-line);
+    margin-bottom: 6px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion — the entire budget is one breathing node + button hover.
+   Resting states already convey everything (shape + glyph + label + static
+   glow), so reduced-motion loses nothing essential.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes breathe {
+    0%,
+    100% {
+      box-shadow: 0 0 10px rgba(43, 227, 167, 0.55);
+    }
+    50% {
+      box-shadow: 0 0 14px rgba(43, 227, 167, 0.75);
+    }
+  }
+  .t-row[data-status="playing"] > .t-node {
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

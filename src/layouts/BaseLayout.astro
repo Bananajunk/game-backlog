@@ -1,0 +1,34 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  /** Document title shown in the browser tab. */
+  title?: string;
+  /** Meta description for search/social previews. */
+  description?: string;
+}
+
+const {
+  title = "Backlog — Finish more games. Start fewer by accident.",
+  description = "Backlog is a local-first game tracker that keeps your queue, your currently-playing games, and your completed history honest — so you actually finish what you start.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0b0e" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

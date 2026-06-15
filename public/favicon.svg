@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Backlog">
+  <rect width="32" height="32" rx="8" fill="#0a0b0e" />
+  <!-- rail -->
+  <rect x="9.5" y="6" width="2" height="20" rx="1" fill="#2a3340" />
+  <!-- completed node (hollow) -->
+  <circle cx="10.5" cy="9.5" r="2.4" fill="none" stroke="#9cc0e8" stroke-width="1.6" />
+  <!-- live node (filled mint) -->
+  <circle cx="10.5" cy="16" r="3" fill="#2be3a7" />
+  <!-- backlog node (square) -->
+  <rect x="8.4" y="22" width="4.2" height="4.2" rx="1" fill="none" stroke="#aeb6c2" stroke-width="1.6" />
+</svg>

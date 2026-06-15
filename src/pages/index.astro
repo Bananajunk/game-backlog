@@ -1,0 +1,171 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FeatureCard from "../components/FeatureCard.astro";
+import TimelinePreview from "../components/TimelinePreview.astro";
+
+const features = [
+  {
+    title: "Backlog Queue",
+    description:
+      "A FIFO queue for everything you mean to play. What you add first surfaces first — no more bottomless wishlist.",
+    icon: "queue",
+  },
+  {
+    title: "Currently Playing",
+    description:
+      "Track the handful of games you're actively playing, across every platform you own, in one honest list.",
+    icon: "playing",
+  },
+  {
+    title: "Completion History",
+    description:
+      "Mark games completed or dropped — both count. Build a record of how your runs actually ended.",
+    icon: "history",
+  },
+  {
+    title: "Chain Timeline",
+    description:
+      "See past, present, and future games in one vertical flow, so you can pick what's next on purpose.",
+    icon: "chain",
+  },
+] as const;
+---
+
+<BaseLayout>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header class="mx-auto flex max-w-5xl items-center justify-between px-5 py-2">
+    <a
+      href="#top"
+      class="inline-flex min-h-11 items-center gap-2 text-ink no-underline"
+    >
+      <span
+        class="inline-block h-2.5 w-2.5 rounded-full bg-accent"
+        aria-hidden="true"></span>
+      <span class="font-medium">Backlog</span>
+    </a>
+    <nav aria-label="Primary">
+      <a
+        href="#features"
+        class="inline-flex min-h-11 items-center text-sm text-ink-dim hover:text-ink"
+        >Features</a
+      >
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <!-- ───────────────────────── Hero ───────────────────────── -->
+    <section id="top" class="mx-auto max-w-3xl px-5 pt-10 pb-16 text-center sm:pt-16">
+      <p class="kicker">Local-first game tracker</p>
+      <h1 class="mt-4 text-4xl sm:text-5xl">Backlog</h1>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-ink sm:text-xl">
+        Finish more games. Start fewer by accident.
+      </p>
+      <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-ink-dim">
+        Backlog keeps your whole rotation in one place — a queue of what's next,
+        the few games you're actively playing across platforms, and a clean
+        record of everything you've completed or dropped. Decide your next game
+        on purpose, not by accident.
+      </p>
+      <div
+        class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
+      >
+        <!-- No app route exists yet; both CTAs reveal the in-page preview.
+             Wire "Start Tracking" to /app once the tracker ships. -->
+        <a href="#preview" class="btn btn-primary">Start Tracking</a>
+        <a href="#preview" class="btn btn-secondary">View Demo</a>
+      </div>
+    </section>
+
+    <!-- ─────────────────────── Features ─────────────────────── -->
+    <section
+      id="features"
+      aria-labelledby="features-heading"
+      class="mx-auto max-w-5xl scroll-mt-6 px-5 py-12"
+    >
+      <div class="mb-8 text-center">
+        <p class="kicker">What it does</p>
+        <h2 id="features-heading" class="mt-3 text-2xl sm:text-3xl">
+          A tracker, not a wishlist
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {
+          features.map((feature) => (
+            <FeatureCard title={feature.title} description={feature.description}>
+              <svg
+                slot="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="20"
+                height="20"
+                aria-hidden="true"
+              >
+                {feature.icon === "queue" && (
+                  <>
+                    <path d="M4 7h16" />
+                    <path d="M4 12h11" />
+                    <path d="M4 17h6" />
+                  </>
+                )}
+                {feature.icon === "playing" && <path d="M7 5v14l11-7z" fill="currentColor" stroke="none" />}
+                {feature.icon === "history" && (
+                  <>
+                    <circle cx="12" cy="12" r="8.5" />
+                    <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+                  </>
+                )}
+                {feature.icon === "chain" && (
+                  <>
+                    <circle cx="7" cy="6" r="2.2" />
+                    <circle cx="7" cy="18" r="2.2" />
+                    <circle cx="17" cy="12" r="2.2" />
+                    <path d="M7 8.2v7.6" />
+                    <path d="M9 7.2c4 1 6 2.4 6 4.8" />
+                  </>
+                )}
+              </svg>
+            </FeatureCard>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- ─────────────────────── Preview ──────────────────────── -->
+    <section
+      id="preview"
+      aria-labelledby="preview-heading"
+      class="mx-auto max-w-3xl scroll-mt-6 px-5 py-12"
+    >
+      <div class="mb-8 text-center">
+        <p class="kicker">The chain</p>
+        <h2 id="preview-heading" class="mt-3 text-2xl sm:text-3xl">
+          Your whole run, in one flow
+        </h2>
+        <p class="mx-auto mt-3 max-w-md text-base leading-relaxed text-ink-dim">
+          Completed games sit above, what you're playing now anchors the center,
+          and your backlog waits below — connected by a single chain.
+        </p>
+      </div>
+
+      <TimelinePreview />
+    </section>
+  </main>
+
+  <!-- ──────────────────────── Footer ───────────────────────── -->
+  <footer class="mx-auto max-w-5xl px-5 py-12">
+    <div
+      class="card flex flex-col items-center gap-2 px-6 py-8 text-center"
+    >
+      <p class="text-base text-ink-dim">
+        Built for players who want to actually finish their games.
+      </p>
+      <p class="kicker">Backlog · Local-first · No account needed</p>
+    </div>
+  </footer>
+</BaseLayout>
