@@ -443,6 +443,52 @@
     margin-top: 22px;
   }
 
+  /* Playing list (M3) — rendered by <playing-list> into light DOM, like the
+     backlog list, so these classes (not Tailwind utilities in the .ts file)
+     carry its styling. Mobile-first single column; each in-progress game is a
+     card with the three raw status transitions. */
+  playing-list {
+    display: block;
+  }
+  .playing-empty {
+    margin-top: 24px;
+    color: var(--color-ink-dim);
+  }
+  .playing-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+    padding: 0;
+    list-style: none;
+  }
+  .playing-item {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+  }
+  .playing-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .playing-platforms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+  }
+  .playing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Compact buttons for the row; the shared .btn min-height is taller. */
+  .playing-actions .btn {
+    min-height: 40px;
+    padding: 10px 14px;
+    font-size: 0.875rem; /* 14px */
+  }
+
   /* ---------------------------------------------------------------------
      Timeline preview — pure CSS, zero SVG for the rail/nodes/branch.
      Marker SHAPE + the row's text status chip carry the meaning; the
