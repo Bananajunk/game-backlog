@@ -211,7 +211,8 @@
     margin-top: 24px;
     padding: 20px;
   }
-  .add-game-form .field {
+  .add-game-form .field,
+  .backlog-edit .field {
     display: grid;
     gap: 7px;
     border: 0;
@@ -220,12 +221,15 @@
     min-width: 0;
   }
   .add-game-form label,
-  .add-game-form legend {
+  .add-game-form legend,
+  .backlog-edit label,
+  .backlog-edit legend {
     font-size: 0.875rem; /* 14px */
     font-weight: 500;
     color: var(--color-ink);
   }
-  .add-game-form legend {
+  .add-game-form legend,
+  .backlog-edit legend {
     padding: 0;
     margin-bottom: 10px;
   }
@@ -234,7 +238,8 @@
     color: var(--color-ink-muted);
   }
   .add-game-form input[type="text"],
-  .add-game-form input[type="number"] {
+  .add-game-form input[type="number"],
+  .backlog-edit input[type="text"] {
     width: 100%;
     min-height: 46px;
     padding: 11px 13px;
@@ -244,12 +249,14 @@
     border: 1px solid var(--color-control-border);
     border-radius: var(--radius-chip);
   }
-  .add-game-form .platforms {
+  .add-game-form .platforms,
+  .backlog-edit .platforms {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 10px 16px;
   }
-  .add-game-form .platform {
+  .add-game-form .platform,
+  .backlog-edit .platform {
     display: flex;
     align-items: center;
     gap: 9px;
@@ -257,7 +264,8 @@
     font-weight: 400;
     color: var(--color-ink-dim);
   }
-  .add-game-form input[type="checkbox"] {
+  .add-game-form input[type="checkbox"],
+  .backlog-edit input[type="checkbox"] {
     flex: none;
     width: 18px;
     height: 18px;
@@ -265,7 +273,8 @@
   }
   /* Inline validation error. Colour is never the sole signal — the ⚠ glyph,
      the wording, and role="alert" carry it; ink keeps it fully legible. */
-  .add-game-form .form-error {
+  .add-game-form .form-error,
+  .backlog-edit .form-error {
     margin: 2px 0 0;
     font-size: 0.8125rem; /* 13px */
     font-weight: 500;
@@ -296,6 +305,17 @@
     display: grid;
     gap: 16px;
     padding: 16px;
+  }
+  /* Inline edit form (#8). Reuses the add-game-form field/input/platform
+     styling above; only the form layout and its action row are new. */
+  .backlog-edit {
+    display: grid;
+    gap: 16px;
+  }
+  .backlog-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .backlog-title {
     font-size: 1rem;
