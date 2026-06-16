@@ -13,13 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 24
-          cache: npm
+          bun-version-file: .bun-version
 
-      - run: npm install
+      # --frozen-lockfile mirrors Cloudflare Pages (which installs with the same
+      # pinned Bun) and fails the PR if bun.lock drifts, rather than letting the
+      # drift reach a deploy. See CLAUDE.md ("Bun is the toolchain").
+      - run: bun install --frozen-lockfile
 
-      - run: npm run check
+      - run: bun run check
 
-      - run: npm run build
+      - run: bun run build
