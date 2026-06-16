@@ -56,14 +56,15 @@ backlog/
     ├── styles/
     │   └── global.css      # @import "tailwindcss" + @theme tokens + components
     ├── layouts/
-    │   └── BaseLayout.astro # <html> shell, <head> meta, dark color-scheme
+    │   ├── BaseLayout.astro # <html> shell, <head> meta, dark color-scheme
+    │   └── AppLayout.astro  # wraps BaseLayout; adds the sticky app nav bar
     ├── components/
     │   ├── FeatureCard.astro    # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
         ├── index.astro     # the landing page (hero, features, preview, footer)
         └── app/
-            └── index.astro # the app shell (placeholder; the /app route)
+            └── index.astro # the app shell (placeholder; uses AppLayout)
 ```
 
 ## Theming
@@ -93,6 +94,6 @@ accent rationed to the live game node and the primary CTA.
 
 No database, auth, API integrations, or state management, and no client-side
 router (routes are plain Astro pages). No IGDB or IsThereAnyDeal integration.
-The `/app` route is currently a bare placeholder shell; the two landing-page
-CTAs still scroll to the in-page preview and will point at the app once the
-tracker is usable.
+The `/app` route currently has its app layout and nav bar but no tracker
+features yet; the two landing-page CTAs still scroll to the in-page preview and
+will point at the app once the tracker is usable.
