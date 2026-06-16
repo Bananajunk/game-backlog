@@ -4,10 +4,12 @@
 
 A mobile-first, **local-first** game backlog tracker. This repository contains
 the project foundation, a polished marketing landing page, and the start of the
-tracker app at `/app` — which now has a manual **add a game** form and a
-**backlog list** (the FIFO queue, with manual reordering, inline editing of a
-game's title and platforms, and delete behind a confirmation dialog), with the
-remaining tracker views still to come.
+tracker app at `/app` — which now has a manual **add a game** form, a **backlog
+list** (the FIFO queue, with manual reordering, inline editing of a game's title
+and platforms, delete behind a confirmation dialog, and a **Start Playing**
+action), and a **playing list** (the in-progress view, with **Mark Complete**,
+**Drop Game**, and **Back to Backlog** transitions), with the history and
+timeline views still to come.
 
 The eventual app will let players:
 
@@ -71,13 +73,14 @@ backlog/
     │   └── AppLayout.astro  # wraps BaseLayout; adds the sticky app nav bar
     ├── components/
     │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
-    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit + delete (<dialog> confirm)
+    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit, delete (<dialog> confirm) + Start Playing
+    │   ├── PlayingList.ts        # <playing-list> Web Component — in-progress games with Complete / Drop / Back-to-Backlog transitions
     │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
         ├── index.astro     # the landing page (hero, features, preview, footer)
         └── app/
-            └── index.astro # the app shell — hosts <add-game-form> + <backlog-list>; uses AppLayout
+            └── index.astro # the app shell — hosts <add-game-form> + <playing-list> + <backlog-list>; uses AppLayout
 ```
 
 ## Theming
@@ -108,9 +111,11 @@ accent rationed to the live game node and the primary CTA.
 No database, auth, API integrations, or state management library, and no
 client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
 integration. The `/app` route now has its first tracker features — a manual *add
-a game* form and a *backlog list* (the FIFO queue, with manual reordering,
-inline editing of a game's title and platforms, delete behind a confirmation
-dialog, and a *Start Playing* action that moves a game into the playing status),
-both backed by localStorage — but the playing, history, and timeline views are
-still to come; the two landing-page CTAs still scroll to the in-page preview and
-will point at the app once the tracker is usable.
+a game* form, a *backlog list* (the FIFO queue, with manual reordering, inline
+editing of a game's title and platforms, delete behind a confirmation dialog,
+and a *Start Playing* action that moves a game into the playing status), and a
+*playing list* (the in-progress view, with *Mark Complete*, *Drop Game*, and
+*Back to Backlog* transitions), all backed by localStorage — but the history and
+timeline views are still to come, as are post-completion rating and the
+multi-game friction warning; the two landing-page CTAs still scroll to the
+in-page preview and will point at the app once the tracker is usable.
