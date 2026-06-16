@@ -31,12 +31,12 @@ type PendingFocus =
  * styling lives in `global.css` under `@layer components`, like the add-game
  * form and the timeline — not as Tailwind utilities here.
  *
- * Scope note: the row renders [Start Playing] | [Edit] | [Remove]. [Edit]
+ * Scope note: the row renders [Start Playing] | [Edit] | [Remove].
+ * [Start Playing] flips the game's status to "playing" and stamps `dateStarted`
+ * at the moment of the click, then fires `status-changed` so the row leaves the
+ * queue immediately and the playing view (M4) can pick it up (#10). [Edit]
  * transforms the row into an inline edit form (#8); [Remove] opens a
- * `<dialog role="alertdialog">` confirmation before deleting (#9). The
- * playing-status transition (a later milestone) attaches its behaviour to
- * [Start Playing] in its own issue — wiring it now would front-run that
- * sequenced work.
+ * `<dialog role="alertdialog">` confirmation before deleting (#9).
  */
 class BacklogList extends HTMLElement {
   /** Restored after a reorder/edit so keyboard users don't lose their place. */
@@ -67,8 +67,10 @@ class BacklogList extends HTMLElement {
     if (!id) return;
 
     // Save is a submit button, handled in onSubmit (so Enter works too).
-    // Start Playing is owned by a later issue; ignore it for now.
     switch (button.dataset.action) {
+      case 'start':
+        this.startPlaying(id);
+        break;
       case 'up':
         this.move(id, -1);
         break;
@@ -157,6 +159,27 @@ class BacklogList extends HTMLElement {
     // lands back on the button the user just pressed, on its new row.
     this.pendingFocus = { kind: 'reorder', id, action: direction < 0 ? 'up' : 'down' };
     document.dispatchEvent(new CustomEvent('game-updated'));
+  }
+
+  /** Move a backlog game into "playing": flip its status and stamp `dateStarted`
+   *  at the moment of the click (never on load), persist, then announce
+   *  `status-changed`. The list re-renders off that event and drops the row
+   *  (it no longer matches `status === 'backlog'`); the playing view (M4) is the
+   *  other listener. No confirmation — starting is cheap and reversible. */
+  private startPlaying(id: string) {
+    const state = loadState();
+    const userGame = state.userGames.find((ug) => ug.id === id);
+    if (!userGame) return; // row vanished underneath us — nothing to do
+
+    userGame.status = 'playing';
+    userGame.dateStarted = new Date().toISOString();
+    saveState(state);
+
+    document.dispatchEvent(
+      new CustomEvent('status-changed', {
+        detail: { id: userGame.id, newStatus: 'playing' },
+      }),
+    );
   }
 
   /** Switch a row into edit mode. Only one at a time: setting `editingId`
