@@ -7,16 +7,20 @@ import AppLayout from "../../layouts/AppLayout.astro";
     <p class="kicker">Your library</p>
     <h1 class="mt-3 text-3xl sm:text-4xl">My Backlog</h1>
     <p class="mt-4 max-w-prose text-base leading-relaxed text-ink-dim">
-      Your tracker lives here. Soon this page will hold your queue, the games
-      you're playing now, and your completed history — all stored locally on
-      this device.
+      Your queue lives here. Soon this page will also hold the games you're
+      playing now and your completed history — all stored locally on this
+      device.
     </p>
 
     <h2 class="mt-10 text-xl sm:text-2xl">Add a game</h2>
     <add-game-form></add-game-form>
+
+    <h2 class="mt-12 text-xl sm:text-2xl">Your backlog</h2>
+    <backlog-list></backlog-list>
   </main>
 </AppLayout>
 
 <script>
   import "../../components/AddGameForm";
+  import "../../components/BacklogList";
 </script>

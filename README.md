@@ -4,8 +4,9 @@
 
 A mobile-first, **local-first** game backlog tracker. This repository contains
 the project foundation, a polished marketing landing page, and the start of the
-tracker app at `/app` — which now has a manual **add a game** form, with the
-remaining tracker views still to come.
+tracker app at `/app` — which now has a manual **add a game** form and a
+**backlog list** (the FIFO queue, with manual reordering), with the remaining
+tracker views still to come.
 
 The eventual app will let players:
 
@@ -68,12 +69,13 @@ backlog/
     │   └── AppLayout.astro  # wraps BaseLayout; adds the sticky app nav bar
     ├── components/
     │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
+    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering
     │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
         ├── index.astro     # the landing page (hero, features, preview, footer)
         └── app/
-            └── index.astro # the app shell — hosts <add-game-form>; uses AppLayout
+            └── index.astro # the app shell — hosts <add-game-form> + <backlog-list>; uses AppLayout
 ```
 
 ## Theming
@@ -103,7 +105,8 @@ accent rationed to the live game node and the primary CTA.
 
 No database, auth, API integrations, or state management library, and no
 client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
-integration. The `/app` route now has its first tracker feature — a manual *add
-a game* form that writes to localStorage — but the queue, history, and timeline
-views are still to come; the two landing-page CTAs still scroll to the in-page
-preview and will point at the app once the tracker is usable.
+integration. The `/app` route now has its first tracker features — a manual *add
+a game* form and a *backlog list* (the FIFO queue, with manual reordering), both
+backed by localStorage — but the playing, history, and timeline views are still
+to come; the two landing-page CTAs still scroll to the in-page preview and will
+point at the app once the tracker is usable.
