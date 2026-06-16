@@ -75,8 +75,8 @@ Two gates are mandatory; the third applies whenever the change is observable in
 a browser. Re-run after every fix until green.
 
 ```bash
-npm run check    # astro check — must report 0 errors (this is the "lint")
-npm run build    # must succeed AND emit the expected route/artifact
+bun run check    # astro check — must report 0 errors (this is the "lint")
+bun run build    # must succeed AND emit the expected route/artifact
 ```
 
 If the change renders something (a new page or route, a visible UI change),
@@ -129,7 +129,7 @@ git switch -c <type>/<short-kebab-slug>      # feat/… or fix/…, off main
 
 **Stage only the files your issue touched.** Inspect `git status` first and add
 files by name — never `git add -A`. There may be unrelated working-tree changes
-(e.g. a pre-existing `package-lock.json` modification) that must NOT ride along
+(e.g. a pre-existing `bun.lock` modification) that must NOT ride along
 in this PR.
 
 ```bash
@@ -160,7 +160,7 @@ gh pr create --repo OWNER/REPO --base main --head <branch> --draft \
 PR body: a short **What**, a **Details** bullet list, the **Verification**
 results (the gate outcomes from step 3), a **Docs** note if you touched
 `CLAUDE.md` or `README.md`, and an **Out of scope** note for anything you deliberately left out
-(like that unrelated `package-lock.json` change). End the body with:
+(like that unrelated `bun.lock` change). End the body with:
 
 ```
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
@@ -183,7 +183,7 @@ gh issue view N --repo OWNER/REPO --json state -q .state   # expect CLOSED
 ```
 
 Confirm `main` fast-forwarded to the merge commit and the issue is `CLOSED`. If
-an unrelated change (e.g. `package-lock.json`) was intentionally left out, note
+an unrelated change (e.g. `bun.lock`) was intentionally left out, note
 that it's still uncommitted so the user isn't surprised.
 
 ## Quick reference
@@ -191,8 +191,8 @@ that it's still uncommitted so the user isn't surprised.
 | Phase | Command / tool |
 | --- | --- |
 | Fetch issue | `gh issue view N --repo OWNER/REPO --json number,title,body,labels,milestone,state,comments` |
-| Type gate | `npm run check` (0 errors) |
-| Build gate | `npm run build` (emits the route) |
+| Type gate | `bun run check` (0 errors) |
+| Build gate | `bun run build` (emits the route) |
 | Browser proof | `preview_start` (`backlog-dev`) → `preview_eval` nav → `preview_snapshot` → `preview_console_logs` → `preview_screenshot` |
 | Branch | `git switch -c feat/<slug>` |
 | Draft PR | `gh pr create --draft --base main --body "…Closes #N…"` |

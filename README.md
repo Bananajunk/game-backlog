@@ -25,22 +25,24 @@ The eventual app will let players:
 
 ## Getting started
 
+This project uses [Bun](https://bun.com) (pinned in `.bun-version`).
+
 ```bash
 # 1. install dependencies
-npm install
+bun install
 
 # 2. start the dev server  →  http://localhost:4321
-npm run dev
+bun run dev
 ```
 
 ### All scripts
 
 | Command           | Action                                            |
 | ----------------- | ------------------------------------------------- |
-| `npm run dev`     | Start the local dev server at `localhost:4321`    |
-| `npm run build`   | Build the production site to `./dist/`            |
-| `npm run preview` | Preview the production build locally              |
-| `npm run check`   | Type-check `.astro`/`.ts` files (`astro check`)   |
+| `bun run dev`     | Start the local dev server at `localhost:4321`    |
+| `bun run build`   | Build the production site to `./dist/`            |
+| `bun run preview` | Preview the production build locally              |
+| `bun run check`   | Type-check `.astro`/`.ts` files (`astro check`)   |
 
 ## Project structure
 
