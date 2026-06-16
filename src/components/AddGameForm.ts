@@ -1,17 +1,6 @@
+import { PLATFORMS } from '../lib/platforms';
 import { generateId, loadState, saveState } from '../lib/storage';
 import type { Game, UserGame } from '../types';
-
-/** Platforms offered as checkboxes, in display order. */
-const PLATFORMS = [
-  'PC',
-  'PS5',
-  'PS4',
-  'Xbox Series X',
-  'Xbox One',
-  'Nintendo Switch',
-  'Mobile',
-  'Other',
-] as const;
 
 /** Per-instance counter so label `for`/`id` pairs stay unique on the page. */
 let instanceCount = 0;

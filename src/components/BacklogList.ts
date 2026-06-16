@@ -1,3 +1,4 @@
+import { PLATFORMS } from '../lib/platforms';
 import { loadState, saveState } from '../lib/storage';
 import type { Game, UserGame } from '../types';
 
@@ -9,27 +10,39 @@ const CHANGE_EVENTS = [
   'status-changed',
 ] as const;
 
+/** In-progress edit values, captured from the live DOM across re-renders. */
+type EditDraft = { title: string; platforms: string[] };
+
+/** Where focus should land after the next render. */
+type PendingFocus =
+  | { kind: 'reorder'; id: string; action: 'up' | 'down' }
+  | { kind: 'edit'; id: string } // the title input, on entering edit mode
+  | { kind: 'editButton'; id: string }; // the [Edit] button, on exiting it
+
 /**
  * `<backlog-list>` — the core backlog view (M2). Renders every `backlog`
  * {@link UserGame} as a FIFO queue: `sortOrder` ascending, `dateAdded` as the
  * tiebreaker. Reads from localStorage via the storage helpers and re-renders on
  * any of the {@link CHANGE_EVENTS} so it stays in sync with the add-game form
- * and (later) the edit/delete flows — no full page reload.
+ * and the edit/delete flows — no full page reload.
  *
  * Rendered into light DOM (no shadow root) so the global theme tokens, the
  * `.btn`/`.card` classes, and the global `:focus-visible` ring all apply; its
  * styling lives in `global.css` under `@layer components`, like the add-game
  * form and the timeline — not as Tailwind utilities here.
  *
- * Scope note: the row renders [Start Playing] | [Edit] | [Remove] as the issue
- * requires, but only the Move Up/Down reordering is wired here. Editing (#8),
- * deletion (#9), and the playing-status transition (a later milestone) attach
- * their behaviour to these buttons in their own issues — wiring them now would
- * front-run that sequenced work.
+ * Scope note: the row renders [Start Playing] | [Edit] | [Remove]. [Edit] now
+ * transforms the row into an inline edit form (#8). Removal (#9) and the
+ * playing-status transition (a later milestone) attach their behaviour to the
+ * remaining buttons in their own issues — wiring them now would front-run that
+ * sequenced work.
  */
 class BacklogList extends HTMLElement {
-  /** Restored after a reorder so keyboard users don't lose their place. */
-  private pendingFocus: { id: string; action: 'up' | 'down' } | null = null;
+  /** Restored after a reorder/edit so keyboard users don't lose their place. */
+  private pendingFocus: PendingFocus | null = null;
+
+  /** The single row currently in edit mode, by `UserGame.id`, or null. */
+  private editingId: string | null = null;
 
   private readonly onStateChange = () => this.render();
 
@@ -41,13 +54,46 @@ class BacklogList extends HTMLElement {
     const id = button.closest<HTMLElement>('[data-id]')?.dataset.id;
     if (!id) return;
 
-    // Edit / Remove / Start Playing are owned by sibling issues; ignore for now.
-    if (button.dataset.action === 'up') this.move(id, -1);
-    else if (button.dataset.action === 'down') this.move(id, 1);
+    // Save is a submit button, handled in onSubmit (so Enter works too).
+    // Remove and Start Playing are owned by sibling issues; ignore for now.
+    switch (button.dataset.action) {
+      case 'up':
+        this.move(id, -1);
+        break;
+      case 'down':
+        this.move(id, 1);
+        break;
+      case 'edit':
+        this.startEdit(id);
+        break;
+      case 'cancel':
+        this.cancelEdit(id);
+        break;
+    }
+  };
+
+  /** Save the edit on submit — fired by the [Save] button or Enter in the title. */
+  private readonly onSubmit = (event: Event) => {
+    const form = (event.target as HTMLElement).closest<HTMLFormElement>(
+      'form.backlog-edit',
+    );
+    if (!form) return;
+    event.preventDefault();
+    const id = form.closest<HTMLElement>('[data-id]')?.dataset.id;
+    if (id) this.saveEdit(id);
+  };
+
+  /** Escape cancels the open edit form. */
+  private readonly onKeydown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || this.editingId === null) return;
+    event.preventDefault();
+    this.cancelEdit(this.editingId);
   };
 
   connectedCallback() {
     this.addEventListener('click', this.onClick);
+    this.addEventListener('submit', this.onSubmit);
+    this.addEventListener('keydown', this.onKeydown);
     for (const name of CHANGE_EVENTS) {
       document.addEventListener(name, this.onStateChange);
     }
@@ -56,6 +102,8 @@ class BacklogList extends HTMLElement {
 
   disconnectedCallback() {
     this.removeEventListener('click', this.onClick);
+    this.removeEventListener('submit', this.onSubmit);
+    this.removeEventListener('keydown', this.onKeydown);
     for (const name of CHANGE_EVENTS) {
       document.removeEventListener(name, this.onStateChange);
     }
@@ -88,26 +136,92 @@ class BacklogList extends HTMLElement {
 
     // The render triggered by `game-updated` (below) consumes this so focus
     // lands back on the button the user just pressed, on its new row.
-    this.pendingFocus = { id, action: direction < 0 ? 'up' : 'down' };
+    this.pendingFocus = { kind: 'reorder', id, action: direction < 0 ? 'up' : 'down' };
+    document.dispatchEvent(new CustomEvent('game-updated'));
+  }
+
+  /** Switch a row into edit mode. Only one at a time: setting `editingId`
+   *  replaces any other, so opening edit on row B closes row A. */
+  private startEdit(id: string) {
+    this.editingId = id;
+    this.pendingFocus = { kind: 'edit', id };
+    this.render();
+  }
+
+  /** Leave edit mode without saving; focus returns to the [Edit] button. */
+  private cancelEdit(id: string) {
+    this.editingId = null;
+    this.pendingFocus = { kind: 'editButton', id };
+    this.render(); // no state changed, so render directly rather than via event
+  }
+
+  /** Persist the edited title/platforms, then return the row to display mode. */
+  private saveEdit(id: string) {
+    const state = loadState();
+    const userGame = state.userGames.find((ug) => ug.id === id);
+    const game = userGame
+      ? state.games.find((g) => g.id === userGame.gameId)
+      : undefined;
+    if (!game) {
+      this.cancelEdit(id); // row vanished underneath us — just exit cleanly
+      return;
+    }
+
+    const row = this.querySelector<HTMLElement>(`[data-id="${id}"]`);
+    const titleInput = row?.querySelector<HTMLInputElement>(
+      'input[name="title"]',
+    );
+    const title = titleInput?.value.trim() ?? '';
+
+    // Mirror the add-game form: refuse a blank title, keep editing, surface the
+    // inline error (glyph + words + role="alert" carry it, never colour alone).
+    if (!title) {
+      const error = row?.querySelector<HTMLElement>('.form-error');
+      if (error) error.hidden = false;
+      titleInput?.setAttribute('aria-invalid', 'true');
+      titleInput?.focus();
+      return;
+    }
+
+    const platforms = Array.from(
+      row?.querySelectorAll<HTMLInputElement>(
+        'input[name="platform"]:checked',
+      ) ?? [],
+    ).map((input) => input.value);
+
+    game.title = title;
+    game.platforms = platforms;
+    saveState(state);
+
+    this.editingId = null;
+    this.pendingFocus = { kind: 'editButton', id };
     document.dispatchEvent(new CustomEvent('game-updated'));
   }
 
   private render() {
+    // Capture any in-progress edit before the rebuild discards the form, so an
+    // external re-render (e.g. a reorder on another row) keeps what was typed.
+    const draft = this.captureDraft();
+
     const state = loadState();
     const queue = this.backlogQueue(state);
 
     if (queue.length === 0) {
       this.innerHTML =
         '<p class="backlog-empty">Your backlog is empty. Add a game to get started.</p>';
+      this.editingId = null;
       this.pendingFocus = null;
       return;
     }
 
     const gamesById = new Map(state.games.map((game) => [game.id, game]));
     const rows = queue
-      .map((userGame, index) =>
-        this.row(userGame, gamesById.get(userGame.gameId), index, queue.length),
-      )
+      .map((userGame, index) => {
+        const game = gamesById.get(userGame.gameId);
+        return userGame.id === this.editingId
+          ? this.editRow(userGame, game, draft)
+          : this.row(userGame, game, index, queue.length);
+      })
       .join('');
     this.innerHTML = `<ul class="backlog-list">${rows}</ul>`;
 
@@ -157,7 +271,91 @@ class BacklogList extends HTMLElement {
       </li>`;
   }
 
-  /** Move focus back onto the just-pressed reorder button after a re-render. */
+  /** The same row, transformed into an inline edit form (#8). Pre-filled from
+   *  the captured draft if present, otherwise from the stored game. */
+  private editRow(
+    userGame: UserGame,
+    game: Game | undefined,
+    draft: EditDraft | null,
+  ): string {
+    const title = draft ? draft.title : (game?.title ?? '');
+    const selected = new Set(draft ? draft.platforms : (game?.platforms ?? []));
+    const titleId = `edit-${userGame.id}-title`;
+    const errorId = `edit-${userGame.id}-error`;
+
+    // Offer the canonical options plus any existing platform not among them, so
+    // a non-standard platform is never silently dropped when the user saves.
+    const options = [
+      ...PLATFORMS,
+      ...[...selected].filter(
+        (name) => !(PLATFORMS as readonly string[]).includes(name),
+      ),
+    ];
+
+    const platforms = options
+      .map((name) => {
+        const checked = selected.has(name) ? ' checked' : '';
+        return `
+            <label class="platform">
+              <input type="checkbox" name="platform" value="${escapeHtml(name)}"${checked} />
+              <span>${escapeHtml(name)}</span>
+            </label>`;
+      })
+      .join('');
+
+    return `
+      <li class="backlog-item card" data-id="${escapeHtml(userGame.id)}">
+        <form class="backlog-edit" novalidate>
+          <div class="field">
+            <label for="${titleId}">Title</label>
+            <input
+              id="${titleId}"
+              name="title"
+              type="text"
+              value="${escapeHtml(title)}"
+              required
+              autocomplete="off"
+              aria-describedby="${errorId}"
+            />
+            <p id="${errorId}" class="form-error" role="alert" hidden>
+              <span aria-hidden="true">⚠</span> Enter a title to save.
+            </p>
+          </div>
+
+          <fieldset class="field">
+            <legend>Platforms</legend>
+            <div class="platforms">${platforms}</div>
+          </fieldset>
+
+          <div class="backlog-edit-actions">
+            <button type="submit" class="btn btn-primary" data-action="save">Save</button>
+            <button type="button" class="btn btn-secondary" data-action="cancel">Cancel</button>
+          </div>
+        </form>
+      </li>`;
+  }
+
+  /** Read the live edit-form values, or null when no row is being edited. */
+  private captureDraft(): EditDraft | null {
+    if (!this.editingId) return null;
+    const row = this.querySelector<HTMLElement>(
+      `[data-id="${this.editingId}"]`,
+    );
+    const titleInput = row?.querySelector<HTMLInputElement>(
+      'input[name="title"]',
+    );
+    if (!titleInput) return null; // not yet in edit mode (display row still shown)
+    return {
+      title: titleInput.value,
+      platforms: Array.from(
+        row!.querySelectorAll<HTMLInputElement>(
+          'input[name="platform"]:checked',
+        ),
+      ).map((input) => input.value),
+    };
+  }
+
+  /** Place focus where the last interaction left off after a re-render. */
   private restoreFocus() {
     const focus = this.pendingFocus;
     this.pendingFocus = null;
@@ -165,8 +363,17 @@ class BacklogList extends HTMLElement {
 
     const row = this.querySelector<HTMLElement>(`[data-id="${focus.id}"]`);
     if (!row) return;
-    // The button may have vanished (e.g. ↑ on the new first row) — fall back to
-    // the other reorder button so focus stays on the moved item.
+
+    if (focus.kind === 'edit') {
+      row.querySelector<HTMLInputElement>('input[name="title"]')?.focus();
+      return;
+    }
+    if (focus.kind === 'editButton') {
+      row.querySelector<HTMLElement>('[data-action="edit"]')?.focus();
+      return;
+    }
+    // Reorder: the button may have vanished (e.g. ↑ on the new first row) — fall
+    // back to the other reorder button so focus stays on the moved item.
     const button =
       row.querySelector<HTMLElement>(`[data-action="${focus.action}"]`) ??
       row.querySelector<HTMLElement>('.backlog-reorder [data-action]');
