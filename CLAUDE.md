@@ -38,4 +38,4 @@ There is **no test framework** wired up; `astro check` is the only automated gat
 
 **Vite is pinned via `overrides` in `package.json`.** The `@tailwindcss/vite` peer pulls Vite 8 while Astro 5 runs on Vite 6; the mismatch breaks `astro check`'s types. The `"overrides": { "vite": "^6.4.3" }` forces a single major. Don't remove it without re-checking `astro check`.
 
-`BaseLayout.astro` owns the `<html>`/`<head>` shell and accepts `title`/`description` props; `FeatureCard.astro` takes `title`/`description` props plus a named `icon` slot.
+`BaseLayout.astro` owns the `<html>`/`<head>` shell and accepts `title`/`description` props. `AppLayout.astro` wraps `BaseLayout`, takes a single `title` prop, and adds the sticky app nav bar (the "Backlog" brand mark plus placeholder `Playing`/`Backlog`/`History` links) above a `<slot />`; it deliberately renders no heading, so the page keeps its own `<h1>`. `FeatureCard.astro` takes `title`/`description` props plus a named `icon` slot.
