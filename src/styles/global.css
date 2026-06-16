@@ -30,6 +30,12 @@
   --color-accent-ink: #03130d; /* text on accent — 11.47:1 */
   --color-focus: #5debc0;
 
+  /* Destructive action — the only red in the palette, reserved for permanent
+     deletes. Used as text + border on the elevated fill (a red "ghost" button,
+     not a saturated block), so it reads "danger" while clearing WCAG: 5.83:1 as
+     text on --color-elevated, well past the 3:1 control-boundary minimum. */
+  --color-danger: #ff5d5d;
+
   /* Interactive-control boundary. Unlike the decorative borders above, this
      must identify a clickable control, so it meets WCAG 1.4.11 non-text
      contrast (>=3:1) against the page, the control fill, and the hover fill. */
@@ -173,6 +179,23 @@
     border-color: #828c9d; /* 5.80:1 on bg, 4.85:1 on hover fill */
   }
   .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  /* Destructive variant — a red ghost button (red text + border on the elevated
+     fill), used for the delete confirmation. Mirrors .btn-secondary's geometry
+     and hover lift; the red carries the "danger" meaning and stays legible
+     (5.5:1+) on both the resting and hover fills. */
+  .btn-danger {
+    background-color: var(--color-elevated);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .btn-danger:hover {
+    background-color: #1b1f29;
+  }
+  .btn-danger:active {
     transform: scale(0.98);
   }
 
@@ -386,6 +409,38 @@
   }
   .btn-icon:active {
     transform: scale(0.98);
+  }
+
+  /* Confirmation dialog (#9) — a native <dialog> for destructive removals.
+     showModal() gives focus trapping + Escape-to-close for free, so this is
+     styling only. Built by <backlog-list> into document.body, so the global
+     tokens and the .btn classes apply just as they do elsewhere. */
+  .confirm-dialog {
+    width: calc(100% - 32px);
+    max-width: 26rem;
+    margin: auto; /* center in the viewport (UA default, stated explicitly) */
+    padding: 24px;
+    color: var(--color-ink);
+    background-color: var(--color-elevated);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-card);
+  }
+  .confirm-dialog::backdrop {
+    background-color: rgba(5, 6, 8, 0.72);
+  }
+  .confirm-dialog-title {
+    font-size: 1.125rem; /* 18px */
+  }
+  .confirm-dialog-body {
+    margin-top: 10px;
+    color: var(--color-ink-dim);
+  }
+  .confirm-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 22px;
   }
 
   /* ---------------------------------------------------------------------

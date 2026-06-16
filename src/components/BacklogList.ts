@@ -31,10 +31,11 @@ type PendingFocus =
  * styling lives in `global.css` under `@layer components`, like the add-game
  * form and the timeline — not as Tailwind utilities here.
  *
- * Scope note: the row renders [Start Playing] | [Edit] | [Remove]. [Edit] now
- * transforms the row into an inline edit form (#8). Removal (#9) and the
- * playing-status transition (a later milestone) attach their behaviour to the
- * remaining buttons in their own issues — wiring them now would front-run that
+ * Scope note: the row renders [Start Playing] | [Edit] | [Remove]. [Edit]
+ * transforms the row into an inline edit form (#8); [Remove] opens a
+ * `<dialog role="alertdialog">` confirmation before deleting (#9). The
+ * playing-status transition (a later milestone) attaches its behaviour to
+ * [Start Playing] in its own issue — wiring it now would front-run that
  * sequenced work.
  */
 class BacklogList extends HTMLElement {
@@ -43,6 +44,17 @@ class BacklogList extends HTMLElement {
 
   /** The single row currently in edit mode, by `UserGame.id`, or null. */
   private editingId: string | null = null;
+
+  /** Reusable confirmation dialog (lazily built, kept in `document.body` so the
+   *  list's `innerHTML` re-renders can never wipe or move it). */
+  private dialog: HTMLDialogElement | null = null;
+  private dialogTitle: HTMLElement | null = null;
+
+  /** The [Remove] button that opened the dialog — focus returns here on close. */
+  private removeTrigger: HTMLElement | null = null;
+
+  /** The `UserGame` queued for deletion while the dialog is open. */
+  private pendingRemovalId: string | null = null;
 
   private readonly onStateChange = () => this.render();
 
@@ -55,7 +67,7 @@ class BacklogList extends HTMLElement {
     if (!id) return;
 
     // Save is a submit button, handled in onSubmit (so Enter works too).
-    // Remove and Start Playing are owned by sibling issues; ignore for now.
+    // Start Playing is owned by a later issue; ignore it for now.
     switch (button.dataset.action) {
       case 'up':
         this.move(id, -1);
@@ -68,6 +80,9 @@ class BacklogList extends HTMLElement {
         break;
       case 'cancel':
         this.cancelEdit(id);
+        break;
+      case 'remove':
+        this.confirmRemove(id, button);
         break;
     }
   };
@@ -107,6 +122,10 @@ class BacklogList extends HTMLElement {
     for (const name of CHANGE_EVENTS) {
       document.removeEventListener(name, this.onStateChange);
     }
+    // The dialog lives in `document.body`, so tear it down with the element.
+    this.dialog?.remove();
+    this.dialog = null;
+    this.dialogTitle = null;
   }
 
   /** Backlog user-games in queue order, newest tiebroken by date added. */
@@ -196,6 +215,96 @@ class BacklogList extends HTMLElement {
     this.editingId = null;
     this.pendingFocus = { kind: 'editButton', id };
     document.dispatchEvent(new CustomEvent('game-updated'));
+  }
+
+  /** Open the deletion confirmation for a row's [Remove] button. Nothing is
+   *  removed until the user confirms — see {@link performRemove}. The native
+   *  modal `<dialog>` gives focus trapping (Tab/Shift+Tab cycle only its
+   *  buttons) and Escape-to-dismiss for free — no library, no `confirm()`. */
+  private confirmRemove(id: string, trigger: HTMLElement) {
+    const state = loadState();
+    const userGame = state.userGames.find((ug) => ug.id === id);
+    const game = userGame
+      ? state.games.find((g) => g.id === userGame.gameId)
+      : undefined;
+
+    const dialog = this.ensureDialog();
+    this.removeTrigger = trigger;
+    this.pendingRemovalId = id;
+    // textContent (not innerHTML) keeps the user-entered title injection-safe.
+    this.dialogTitle!.textContent = `Remove ${game?.title ?? 'this game'}?`;
+    dialog.showModal();
+  }
+
+  /** Build the single reusable confirmation dialog the first time it's needed
+   *  and wire its buttons. Appended to `document.body` so the list re-rendering
+   *  its own `innerHTML` never detaches it. */
+  private ensureDialog(): HTMLDialogElement {
+    if (this.dialog) return this.dialog;
+
+    const dialog = document.createElement('dialog');
+    dialog.className = 'confirm-dialog';
+    dialog.setAttribute('role', 'alertdialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'dialog-title');
+    dialog.innerHTML = `
+      <h2 id="dialog-title" class="confirm-dialog-title"></h2>
+      <p class="confirm-dialog-body">
+        This will permanently remove the game from your backlog.
+      </p>
+      <div class="confirm-dialog-actions">
+        <button type="button" class="btn btn-secondary" data-dialog="cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" data-dialog="confirm">Confirm Remove</button>
+      </div>`;
+
+    // Confirm deletes then closes; Cancel just closes. Escape is handled
+    // natively (fires `cancel`, then `close`), so it needs no extra wiring.
+    dialog.addEventListener('click', (event) => {
+      const action = (event.target as HTMLElement).closest<HTMLElement>(
+        '[data-dialog]',
+      )?.dataset.dialog;
+      if (action === 'confirm') {
+        this.performRemove();
+        dialog.close();
+      } else if (action === 'cancel') {
+        dialog.close();
+      }
+    });
+
+    // One place restores focus, covering Cancel, Escape, and Confirm alike. On
+    // a confirmed removal the trigger's row is already gone, so only refocus
+    // when the button still exists (the cancel/Escape paths).
+    dialog.addEventListener('close', () => {
+      this.pendingRemovalId = null;
+      const trigger = this.removeTrigger;
+      this.removeTrigger = null;
+      if (trigger && this.contains(trigger)) trigger.focus();
+    });
+
+    this.dialogTitle = dialog.querySelector<HTMLElement>('#dialog-title');
+    document.body.appendChild(dialog);
+    this.dialog = dialog;
+    return dialog;
+  }
+
+  /** Delete the queued `UserGame`, drop its `Game` if now orphaned, persist, and
+   *  announce `game-removed` so every view re-renders. */
+  private performRemove() {
+    const id = this.pendingRemovalId;
+    if (!id) return;
+
+    const state = loadState();
+    const userGame = state.userGames.find((ug) => ug.id === id);
+    if (!userGame) return; // already gone — nothing to do
+
+    const { gameId } = userGame;
+    state.userGames = state.userGames.filter((ug) => ug.id !== id);
+    // Remove the linked Game only if no other UserGame still references it.
+    if (!state.userGames.some((ug) => ug.gameId === gameId)) {
+      state.games = state.games.filter((g) => g.id !== gameId);
+    }
+    saveState(state);
+    document.dispatchEvent(new CustomEvent('game-removed'));
   }
 
   private render() {

@@ -5,8 +5,9 @@
 A mobile-first, **local-first** game backlog tracker. This repository contains
 the project foundation, a polished marketing landing page, and the start of the
 tracker app at `/app` — which now has a manual **add a game** form and a
-**backlog list** (the FIFO queue, with manual reordering and inline editing of a
-game's title and platforms), with the remaining tracker views still to come.
+**backlog list** (the FIFO queue, with manual reordering, inline editing of a
+game's title and platforms, and delete behind a confirmation dialog), with the
+remaining tracker views still to come.
 
 The eventual app will let players:
 
@@ -70,7 +71,7 @@ backlog/
     │   └── AppLayout.astro  # wraps BaseLayout; adds the sticky app nav bar
     ├── components/
     │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
-    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering + inline edit
+    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit + delete (<dialog> confirm)
     │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
@@ -107,7 +108,8 @@ accent rationed to the live game node and the primary CTA.
 No database, auth, API integrations, or state management library, and no
 client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
 integration. The `/app` route now has its first tracker features — a manual *add
-a game* form and a *backlog list* (the FIFO queue, with manual reordering and
-inline editing of a game's title and platforms), both backed by localStorage —
-but the playing, history, and timeline views are still to come; the two landing-page CTAs still scroll to the in-page preview and will
-point at the app once the tracker is usable.
+a game* form and a *backlog list* (the FIFO queue, with manual reordering,
+inline editing of a game's title and platforms, and delete behind a confirmation
+dialog), both backed by localStorage — but the playing, history, and timeline
+views are still to come; the two landing-page CTAs still scroll to the in-page
+preview and will point at the app once the tracker is usable.
