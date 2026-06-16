@@ -55,6 +55,8 @@ backlog/
     ├── env.d.ts
     ├── types/
     │   └── index.ts       # core domain types (Game, UserGame, AppState) — source of truth
+    ├── lib/
+    │   └── storage.ts     # localStorage load/save + generateId — never throws
     ├── styles/
     │   └── global.css      # @import "tailwindcss" + @theme tokens + components
     ├── layouts/
