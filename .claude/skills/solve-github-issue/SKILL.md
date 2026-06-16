@@ -27,6 +27,37 @@ derive the repo from the git remote (`gh repo view --json nameWithOwner`).
 
 ## The workflow
 
+### 0. Start from a clean, current `main` (prerequisite)
+
+Before touching the issue, make sure you're not about to build on a stale tree
+or amid a pile of dead branches from past PRs. A branch cut from an old `main`
+guarantees needless merge churn, and leftover `[gone]` branches make every later
+cleanup noisier. Do this first, every time.
+
+First confirm the working tree is clean. If there are uncommitted changes,
+**stop and surface them** — don't discard or commit them on the user's behalf:
+
+```bash
+git status --short    # expect empty output; if not, ask before proceeding
+```
+
+Then fast-forward `main` and prune branches that no longer exist on the remote:
+
+```bash
+git switch main
+git fetch --prune origin            # drop remote-tracking refs deleted upstream
+git pull --ff-only origin main      # fast-forward main to the latest
+
+# delete local branches whose upstream is gone (merged + already-deleted PRs):
+git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -d
+```
+
+`git branch -d` (lowercase) deletes only branches Git considers fully merged, so
+it won't silently drop unmerged work — if one refuses to delete, that's a signal
+to look before forcing it with `-D`, not to reach for `-D` reflexively. Now
+you're on a fresh `main` with a tidy branch list, ready to cut the feature
+branch in step 5.
+
 ### 1. Read the issue, then read the code
 
 Fetch the full issue — body, labels, milestone, comments — so nothing in it is
@@ -190,6 +221,8 @@ that it's still uncommitted so the user isn't surprised.
 
 | Phase | Command / tool |
 | --- | --- |
+| Sync `main` | `git switch main && git fetch --prune origin && git pull --ff-only origin main` |
+| Prune dead branches | `git branch -vv \| grep ': gone]' \| awk '{print $1}' \| xargs -r git branch -d` |
 | Fetch issue | `gh issue view N --repo OWNER/REPO --json number,title,body,labels,milestone,state,comments` |
 | Type gate | `bun run check` (0 errors) |
 | Build gate | `bun run build` (emits the route) |
@@ -200,6 +233,9 @@ that it's still uncommitted so the user isn't surprised.
 
 ## Pitfalls that have actually bitten
 
+- **Branching off a stale `main`.** Skipping the step-0 sync means cutting the
+  feature branch from an old base — needless conflicts and a diff that includes
+  commits that already landed. Always `fetch --prune` + `pull --ff-only` first.
 - **Staging everything.** `git add -A` drags unrelated working-tree changes into
   the PR. Add files by name.
 - **Over-building a placeholder.** If the issue says "placeholder shell", ship a
