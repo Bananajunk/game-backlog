@@ -56,7 +56,8 @@ backlog/
     ├── types/
     │   └── index.ts       # core domain types (Game, UserGame, AppState) — source of truth
     ├── lib/
-    │   └── storage.ts     # localStorage load/save + generateId — never throws
+    │   ├── storage.ts     # localStorage load/save + generateId; seeds demo data on first run
+    │   └── seedData.ts    # one-time demo data across all four statuses (no Date.now, no API)
     ├── styles/
     │   └── global.css      # @import "tailwindcss" + @theme tokens + components
     ├── layouts/
