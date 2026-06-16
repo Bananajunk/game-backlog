@@ -109,7 +109,8 @@ No database, auth, API integrations, or state management library, and no
 client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
 integration. The `/app` route now has its first tracker features — a manual *add
 a game* form and a *backlog list* (the FIFO queue, with manual reordering,
-inline editing of a game's title and platforms, and delete behind a confirmation
-dialog), both backed by localStorage — but the playing, history, and timeline
-views are still to come; the two landing-page CTAs still scroll to the in-page
-preview and will point at the app once the tracker is usable.
+inline editing of a game's title and platforms, delete behind a confirmation
+dialog, and a *Start Playing* action that moves a game into the playing status),
+both backed by localStorage — but the playing, history, and timeline views are
+still to come; the two landing-page CTAs still scroll to the in-page preview and
+will point at the app once the tracker is usable.
