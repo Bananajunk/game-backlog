@@ -53,6 +53,8 @@ backlog/
 │   └── favicon.svg         # inline timeline-motif favicon
 └── src/
     ├── env.d.ts
+    ├── types/
+    │   └── index.ts       # core domain types (Game, UserGame, AppState) — source of truth
     ├── styles/
     │   └── global.css      # @import "tailwindcss" + @theme tokens + components
     ├── layouts/
