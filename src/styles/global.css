@@ -199,6 +199,82 @@
     flex: none;
   }
 
+  /* Add-game form — the first interactive tracker control (M2). Rendered into
+     light DOM by <add-game-form>, so these classes (not Tailwind utilities in
+     the .ts file) carry its styling, the same way the timeline does. */
+  add-game-form {
+    display: block;
+  }
+  .add-game-form {
+    display: grid;
+    gap: 20px;
+    margin-top: 24px;
+    padding: 20px;
+  }
+  .add-game-form .field {
+    display: grid;
+    gap: 7px;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  .add-game-form label,
+  .add-game-form legend {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .add-game-form legend {
+    padding: 0;
+    margin-bottom: 10px;
+  }
+  .add-game-form .field-optional {
+    font-weight: 400;
+    color: var(--color-ink-muted);
+  }
+  .add-game-form input[type="text"],
+  .add-game-form input[type="number"] {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    font: inherit;
+    color: var(--color-ink);
+    background-color: var(--color-elevated);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-chip);
+  }
+  .add-game-form .platforms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px 16px;
+  }
+  .add-game-form .platform {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 32px;
+    font-weight: 400;
+    color: var(--color-ink-dim);
+  }
+  .add-game-form input[type="checkbox"] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-accent);
+  }
+  /* Inline validation error. Colour is never the sole signal — the ⚠ glyph,
+     the wording, and role="alert" carry it; ink keeps it fully legible. */
+  .add-game-form .form-error {
+    margin: 2px 0 0;
+    font-size: 0.8125rem; /* 13px */
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .add-game-form .btn-primary {
+    justify-self: start;
+  }
+
   /* ---------------------------------------------------------------------
      Timeline preview — pure CSS, zero SVG for the rail/nodes/branch.
      Marker SHAPE + the row's text status chip carry the meaning; the

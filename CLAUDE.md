@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`Backlog` is a mobile-first, **local-first** video-game backlog tracker. The repo holds the project foundation, a marketing landing page at `/`, and a placeholder app shell at `/app` (`src/pages/app/index.astro`) — the tracker features themselves are not built yet. Planned capabilities: a FIFO backlog queue, multiple "currently playing" games across platforms, completed/dropped history, a chain/timeline view, and manual next-game selection.
+`Backlog` is a mobile-first, **local-first** video-game backlog tracker. The repo holds the project foundation, a marketing landing page at `/`, and the start of the tracker app at `/app` (`src/pages/app/index.astro`), which now has a manual **add-game form** — the remaining tracker views are not built yet. Planned capabilities: a FIFO backlog queue, multiple "currently playing" games across platforms, completed/dropped history, a chain/timeline view, and manual next-game selection.
 
 ## Commands
 
@@ -22,7 +22,7 @@ There is **no test framework** wired up; `astro check` is the only automated gat
 
 - **No React, no UI framework, no client-side router/state library.** The landing page ships **zero client JS**. Use Astro components; reach for a vanilla Web Component only where genuine interactivity is later required.
 - **No backend, auth, database, or external API** (no IGDB / IsThereAnyDeal) yet. The app is local-first by design.
-- The two landing CTAs (`Start Tracking`, `View Demo`) are placeholders that scroll to `#preview`. The `/app` route now exists as a bare placeholder shell, but the CTAs still point to `#preview` — wire `Start Tracking` to `/app` only once the tracker is usable.
+- The two landing CTAs (`Start Tracking`, `View Demo`) are placeholders that scroll to `#preview`. The `/app` route now has a working **add a game** form (its first tracker feature), but the CTAs still point to `#preview` — wire `Start Tracking` to `/app` only once the tracker is usable.
 
 ## Architecture & conventions
 
@@ -42,3 +42,5 @@ There is **no test framework** wired up; `astro check` is the only automated gat
 **Bun is the toolchain — package manager and runner.** The lockfile is `bun.lock` (text format); there is **no `package-lock.json`**. Bun is pinned in `.bun-version` (currently `1.3.3`); CI pins the same via `bun-version-file`, and Cloudflare Pages is pinned via a `BUN_VERSION` build environment variable set to the same value. **Keep all three in lockstep** — a Bun version mismatch is what makes a committed lockfile fail a `--frozen-lockfile` install. This pinning is deliberate: it sidesteps the npm-version lockfile drift (npm 10 vs 11 disagree on the `@tailwindcss/oxide`/`lightningcss` wasm-fallback deps) that Cloudflare's unpinnable npm would otherwise impose. `.nvmrc` still pins Node 24 as a compatible baseline for any tool that shells out to `node`, but the build itself runs under Bun. When bumping Bun, update `.bun-version`, re-run `bun install`, commit the new `bun.lock`, and bump Cloudflare's `BUN_VERSION`.
 
 `BaseLayout.astro` owns the `<html>`/`<head>` shell and accepts `title`/`description` props. `AppLayout.astro` wraps `BaseLayout`, takes a single `title` prop, and adds the sticky app nav bar (the "Backlog" brand mark plus placeholder `Playing`/`Backlog`/`History` links) above a `<slot />`; it deliberately renders no heading, so the page keeps its own `<h1>`. `FeatureCard.astro` takes `title`/`description` props plus a named `icon` slot.
+
+**`AddGameForm.ts` (`<add-game-form>`) is the project's first Web Component** and the template for any future interactive control. It's a **light-DOM** custom element (no shadow root) so the global theme tokens, the `.btn`/`.card` classes, and the global `:focus-visible` ring all apply; its own styling lives in `global.css` under `@layer components` (like the timeline), **not** as Tailwind utilities in the `.ts` file. On submit it appends a `Game` + a `backlog` `UserGame` through the `src/lib/storage.ts` helpers, then dispatches a `game-added` event on `document` for other views to react to. Two gotchas: the page loads it via a **bundled** `<script>import "../../components/AddGameForm"</script>` (an Astro static build won't serve a `src="/src/…"` URL), and the form uses `novalidate` + JS validation so the empty-title case shows our own inline error instead of the browser's native bubble (the `required` attribute is kept for semantics).

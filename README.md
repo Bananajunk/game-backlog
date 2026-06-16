@@ -3,8 +3,9 @@
 > Finish more games. Start fewer by accident.
 
 A mobile-first, **local-first** game backlog tracker. This repository contains
-the project foundation, a polished marketing landing page, and a placeholder
-app shell at `/app` — the tracker features themselves come next.
+the project foundation, a polished marketing landing page, and the start of the
+tracker app at `/app` — which now has a manual **add a game** form, with the
+remaining tracker views still to come.
 
 The eventual app will let players:
 
@@ -66,12 +67,13 @@ backlog/
     │   ├── BaseLayout.astro # <html> shell, <head> meta, dark color-scheme
     │   └── AppLayout.astro  # wraps BaseLayout; adds the sticky app nav bar
     ├── components/
-    │   ├── FeatureCard.astro    # reusable feature card (named `icon` slot)
+    │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
+    │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
         ├── index.astro     # the landing page (hero, features, preview, footer)
         └── app/
-            └── index.astro # the app shell (placeholder; uses AppLayout)
+            └── index.astro # the app shell — hosts <add-game-form>; uses AppLayout
 ```
 
 ## Theming
@@ -99,8 +101,9 @@ accent rationed to the live game node and the primary CTA.
 
 ## What's intentionally not here yet
 
-No database, auth, API integrations, or state management, and no client-side
-router (routes are plain Astro pages). No IGDB or IsThereAnyDeal integration.
-The `/app` route currently has its app layout and nav bar but no tracker
-features yet; the two landing-page CTAs still scroll to the in-page preview and
-will point at the app once the tracker is usable.
+No database, auth, API integrations, or state management library, and no
+client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
+integration. The `/app` route now has its first tracker feature — a manual *add
+a game* form that writes to localStorage — but the queue, history, and timeline
+views are still to come; the two landing-page CTAs still scroll to the in-page
+preview and will point at the app once the tracker is usable.
