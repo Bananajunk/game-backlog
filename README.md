@@ -4,13 +4,14 @@
 
 A mobile-first, **local-first** game backlog tracker. This repository contains
 the project foundation, a polished marketing landing page, and the start of the
-tracker app at `/app` — which now has a manual **add a game** form, a **backlog
-list** (the FIFO queue, with manual reordering, inline editing of a game's title
-and platforms, delete behind a confirmation dialog, and a **Start Playing**
-action), and a **playing list** (the in-progress view, with **Mark Complete**,
-**Drop Game**, and **Back to Backlog** transitions), and a **history list** (the
-archive of completed and dropped games, with a **Restore to Backlog** action),
-with the timeline view still to come.
+tracker app at `/app` — which now leads with a **currently-playing dashboard**
+(the focal first section: in-progress games as prominent cards with a "Playing
+for N days" count and **Mark Complete** / **Drop Game** / **Back to Backlog**
+transitions), then a manual **add a game** form, a **backlog list** (the FIFO
+queue, with manual reordering, inline editing of a game's title and platforms,
+delete behind a confirmation dialog, and a **Start Playing** action), and a
+**history list** (the archive of completed and dropped games, with a **Restore
+to Backlog** action), with the timeline view still to come.
 
 The eventual app will let players:
 
@@ -75,14 +76,14 @@ backlog/
     ├── components/
     │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
     │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit, delete (<dialog> confirm) + Start Playing
-    │   ├── PlayingList.ts        # <playing-list> Web Component — in-progress games with Complete / Drop / Back-to-Backlog transitions
+    │   ├── PlayingDashboard.ts   # <playing-dashboard> Web Component — Currently Playing dashboard (prominent cards, "Playing for N days", Complete / Drop / Back-to-Backlog)
     │   ├── HistoryList.ts        # <history-list> Web Component — completed/dropped archive with Restore to Backlog (inline confirm)
     │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
     └── pages/
         ├── index.astro     # the landing page (hero, features, preview, footer)
         └── app/
-            └── index.astro # the app shell — hosts <add-game-form> + <playing-list> + <backlog-list> + <history-list>; uses AppLayout
+            └── index.astro # the app shell — hosts <playing-dashboard> + <add-game-form> + <backlog-list> + <history-list>; uses AppLayout
 ```
 
 ## Theming
@@ -112,13 +113,14 @@ accent rationed to the live game node and the primary CTA.
 
 No database, auth, API integrations, or state management library, and no
 client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
-integration. The `/app` route now has its first tracker features — a manual *add
-a game* form, a *backlog list* (the FIFO queue, with manual reordering, inline
-editing of a game's title and platforms, delete behind a confirmation dialog,
-and a *Start Playing* action that moves a game into the playing status), and a
-*playing list* (the in-progress view, with *Mark Complete*, *Drop Game*, and
-*Back to Backlog* transitions), and a *history list* (the archive of completed
-and dropped games, with a *Restore to Backlog* action), all backed by
+integration. The `/app` route now has its first tracker features — a
+*currently-playing dashboard* (the focal first section: in-progress games as
+prominent cards with a "Playing for N days" count and *Mark Complete* / *Drop
+Game* / *Back to Backlog* transitions), a manual *add a game* form, a *backlog
+list* (the FIFO queue, with manual reordering, inline editing of a game's title
+and platforms, delete behind a confirmation dialog, and a *Start Playing* action
+that moves a game into the playing status), and a *history list* (the archive of
+completed and dropped games, with a *Restore to Backlog* action), all backed by
 localStorage — but the timeline view is still to come, as are editable
 post-completion rating and the multi-game friction warning; the two landing-page CTAs still scroll to the
 in-page preview and will point at the app once the tracker is usable.

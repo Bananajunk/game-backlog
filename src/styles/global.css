@@ -443,50 +443,59 @@
     margin-top: 22px;
   }
 
-  /* Playing list (M3) — rendered by <playing-list> into light DOM, like the
-     backlog list, so these classes (not Tailwind utilities in the .ts file)
-     carry its styling. Mobile-first single column; each in-progress game is a
-     card with the three raw status transitions. */
-  playing-list {
+  /* Currently Playing dashboard (M4) — the focal section of /app, rendered by
+     <playing-dashboard> into light DOM like the backlog/history lists, so these
+     classes (not Tailwind utilities in the .ts file) carry its styling. Cards
+     are deliberately larger and more prominent than backlog rows — bigger
+     padding, a larger title, and a mint accent rail marking the live status
+     (decorative; "playing" is also carried by the heading, the count, and the
+     "Playing for N days" text). Mobile-first single column; cards are full-width. */
+  playing-dashboard {
     display: block;
   }
-  .playing-empty {
+  .playing-dashboard-empty {
     margin-top: 24px;
     color: var(--color-ink-dim);
   }
-  .playing-list {
-    display: grid;
-    gap: 14px;
+  .playing-dashboard-count {
     margin-top: 24px;
+    font-size: 0.8125rem; /* 13px */
+    color: var(--color-ink-muted);
+  }
+  .playing-dashboard-list {
+    display: grid;
+    gap: 16px;
+    margin-top: 14px;
     padding: 0;
     list-style: none;
   }
-  .playing-item {
+  .playing-card {
     display: grid;
-    gap: 16px;
-    padding: 16px;
+    gap: 18px;
+    padding: 22px;
+    border-left: 3px solid var(--color-status-playing);
   }
-  .playing-title {
-    font-size: 1rem;
+  .playing-card-title {
+    font-size: 1.375rem; /* 22px */
     font-weight: 600;
+    line-height: 1.2;
     color: var(--color-ink);
   }
-  .playing-platforms {
+  .playing-card-platforms {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 9px;
+    margin-top: 12px;
   }
-  .playing-actions {
+  .playing-card-elapsed {
+    margin-top: 12px;
+    font-size: 0.8125rem; /* 13px */
+    color: var(--color-ink-muted);
+  }
+  .playing-card-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-  }
-  /* Compact buttons for the row; the shared .btn min-height is taller. */
-  .playing-actions .btn {
-    min-height: 40px;
-    padding: 10px 14px;
-    font-size: 0.875rem; /* 14px */
   }
 
   /* History list (M3) — rendered by <history-list> into light DOM, like the
