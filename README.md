@@ -6,8 +6,9 @@ A mobile-first, **local-first** game backlog tracker. This repository contains
 the project foundation, a polished marketing landing page, and the start of the
 tracker app at `/app` — which now leads with a **currently-playing dashboard**
 (the focal first section: in-progress games as prominent cards with a "Playing
-for N days" count and **Mark Complete** / **Drop Game** / **Back to Backlog**
-transitions), then a manual **add a game** form, a **backlog list** (the FIFO
+for N days" count, where **Mark Complete** / **Drop Game** open a two-step
+post-completion ceremony — an optional rating, then a next-game picker — and
+**Back to Backlog** is a direct transition), then a manual **add a game** form, a **backlog list** (the FIFO
 queue, with manual reordering, inline editing of a game's title and platforms,
 delete behind a confirmation dialog, and a **Start Playing** action), and a
 **history list** (the archive of completed and dropped games, with a **Restore
@@ -76,7 +77,7 @@ backlog/
     ├── components/
     │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
     │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit, delete (<dialog> confirm) + Start Playing (inline friction warning at 3+ active)
-    │   ├── PlayingDashboard.ts   # <playing-dashboard> Web Component — Currently Playing dashboard (prominent cards, "Playing for N days", Complete / Drop / Back-to-Backlog)
+    │   ├── PlayingDashboard.ts   # <playing-dashboard> Web Component — Currently Playing dashboard (prominent cards, "Playing for N days"; Complete/Drop open a two-step ceremony: optional rating → next-game picker; raw Back-to-Backlog)
     │   ├── HistoryList.ts        # <history-list> Web Component — completed/dropped archive with Restore to Backlog (inline confirm)
     │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
     │   └── TimelinePreview.astro # static chain/timeline mock (pure CSS)
@@ -115,13 +116,15 @@ No database, auth, API integrations, or state management library, and no
 client-side router (routes are plain Astro pages). No IGDB or IsThereAnyDeal
 integration. The `/app` route now has its first tracker features — a
 *currently-playing dashboard* (the focal first section: in-progress games as
-prominent cards with a "Playing for N days" count and *Mark Complete* / *Drop
-Game* / *Back to Backlog* transitions), a manual *add a game* form, a *backlog
-list* (the FIFO queue, with manual reordering, inline editing of a game's title
-and platforms, delete behind a confirmation dialog, and a *Start Playing* action
-that moves a game into the playing status — with an inline friction warning when
-3+ games are already active), and a *history list* (the archive of completed and
-dropped games, with a *Restore to Backlog* action), all backed by localStorage —
-but the timeline view is still to come, as is an editable post-completion rating;
+prominent cards with a "Playing for N days" count, where *Mark Complete* / *Drop
+Game* open a two-step post-completion ceremony — an optional rating, then a
+next-game picker — and *Back to Backlog* is a direct transition), a manual *add a
+game* form, a *backlog list* (the FIFO queue, with manual reordering, inline
+editing of a game's title and platforms, delete behind a confirmation dialog, and
+a *Start Playing* action that moves a game into the playing status — with an
+inline friction warning when 3+ games are already active), and a *history list*
+(the archive of completed and dropped games, with a *Restore to Backlog* action),
+all backed by localStorage — but the timeline view is still to come, and a rating
+is captured only through the ceremony (not yet editable after the fact);
 the two landing-page CTAs still scroll to the in-page preview and will point at
 the app once the tracker is usable.
