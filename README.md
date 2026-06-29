@@ -75,7 +75,7 @@ backlog/
     │   └── AppLayout.astro  # wraps BaseLayout; adds the sticky app nav bar
     ├── components/
     │   ├── AddGameForm.ts        # <add-game-form> Web Component — manual game entry → localStorage
-    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit, delete (<dialog> confirm) + Start Playing
+    │   ├── BacklogList.ts        # <backlog-list> Web Component — FIFO backlog queue with up/down reordering, inline edit, delete (<dialog> confirm) + Start Playing (inline friction warning at 3+ active)
     │   ├── PlayingDashboard.ts   # <playing-dashboard> Web Component — Currently Playing dashboard (prominent cards, "Playing for N days", Complete / Drop / Back-to-Backlog)
     │   ├── HistoryList.ts        # <history-list> Web Component — completed/dropped archive with Restore to Backlog (inline confirm)
     │   ├── FeatureCard.astro     # reusable feature card (named `icon` slot)
@@ -119,8 +119,9 @@ prominent cards with a "Playing for N days" count and *Mark Complete* / *Drop
 Game* / *Back to Backlog* transitions), a manual *add a game* form, a *backlog
 list* (the FIFO queue, with manual reordering, inline editing of a game's title
 and platforms, delete behind a confirmation dialog, and a *Start Playing* action
-that moves a game into the playing status), and a *history list* (the archive of
-completed and dropped games, with a *Restore to Backlog* action), all backed by
-localStorage — but the timeline view is still to come, as are editable
-post-completion rating and the multi-game friction warning; the two landing-page CTAs still scroll to the
-in-page preview and will point at the app once the tracker is usable.
+that moves a game into the playing status — with an inline friction warning when
+3+ games are already active), and a *history list* (the archive of completed and
+dropped games, with a *Restore to Backlog* action), all backed by localStorage —
+but the timeline view is still to come, as is an editable post-completion rating;
+the two landing-page CTAs still scroll to the in-page preview and will point at
+the app once the tracker is usable.

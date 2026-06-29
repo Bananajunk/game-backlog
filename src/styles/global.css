@@ -382,10 +382,39 @@
     gap: 8px;
   }
   /* Compact buttons for the row; the shared .btn min-height is taller. */
-  .backlog-actions .btn {
+  .backlog-actions .btn,
+  .backlog-warning .btn {
     min-height: 40px;
     padding: 10px 14px;
     font-size: 0.875rem; /* 14px */
+  }
+  /* Friction warning (#14) — shown inline in place of a row's controls when the
+     user tries to start a game while 3+ are already active. It nudges, it does
+     not block. The ⚠ glyph + the wording carry the warning; colour is never the
+     sole signal (CLAUDE.md invariant). A neutral left rail just sets it apart. */
+  .backlog-warning {
+    display: grid;
+    gap: 12px;
+    padding-left: 12px;
+    border-left: 3px solid var(--color-line-strong);
+  }
+  .backlog-warning-msg {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-ink-dim);
+  }
+  .backlog-warning-icon {
+    flex: none;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--color-ink);
+  }
+  .backlog-warning-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   /* Square icon buttons for FIFO reordering. Same control boundary + hover as
      .btn-secondary, so they read as clickable (WCAG 1.4.11) without colour. */
