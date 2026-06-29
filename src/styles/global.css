@@ -489,6 +489,105 @@
     font-size: 0.875rem; /* 14px */
   }
 
+  /* History list (M3) — rendered by <history-list> into light DOM, like the
+     backlog and playing lists, so these classes (not Tailwind utilities in the
+     .ts file) carry its styling. Each completed/dropped game is a card showing a
+     four-signal status badge, platform(s), the completion month, the rating, and
+     a reversible [Restore to Backlog] action with an inline confirmation. */
+  history-list {
+    display: block;
+  }
+  .history-empty {
+    margin-top: 24px;
+    color: var(--color-ink-dim);
+  }
+  .history-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+    padding: 0;
+    list-style: none;
+  }
+  .history-item {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+  }
+  .history-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  /* Status badge: marker SHAPE + GLYPH + text LABEL + colour, four signals at
+     once (CLAUDE.md invariant). The status colour is set once on the wrapper and
+     flows via currentColor to the marker border, the glyph stroke, and the
+     label — so shape, glyph, and label each still carry the state without it. */
+  .history-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 9px;
+  }
+  .history-marker {
+    flex: none;
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    background-color: var(--color-bg);
+  }
+  /* Completed: hollow circle. Dropped: square. (Mirrors the timeline legend.) */
+  .history-item[data-status="completed"] .history-status {
+    color: var(--color-status-completed);
+  }
+  .history-item[data-status="completed"] .history-marker {
+    border-radius: 50%;
+  }
+  .history-item[data-status="dropped"] .history-status {
+    color: var(--color-status-dropped);
+  }
+  .history-item[data-status="dropped"] .history-marker {
+    border-radius: 2px;
+  }
+  .history-platforms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+  }
+  .history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-top: 9px;
+    font-size: 0.8125rem; /* 13px */
+    color: var(--color-ink-muted);
+  }
+  /* Inline restore confirmation — restoring is reversible (it just re-queues the
+     game), so a calm inline prompt replaces the row's actions instead of the
+     destructive <dialog> the backlog delete uses. */
+  .history-actions,
+  .history-confirm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .history-confirm {
+    display: grid;
+    gap: 12px;
+  }
+  .history-confirm-msg {
+    margin: 0;
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-ink-dim);
+  }
+  /* Compact buttons for the row; the shared .btn min-height is taller. */
+  .history-item .btn {
+    min-height: 40px;
+    padding: 10px 14px;
+    font-size: 0.875rem; /* 14px */
+  }
+
   /* ---------------------------------------------------------------------
      Timeline preview — pure CSS, zero SVG for the rail/nodes/branch.
      Marker SHAPE + the row's text status chip carry the meaning; the
