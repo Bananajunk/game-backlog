@@ -12,11 +12,11 @@ import AppLayout from "../../layouts/AppLayout.astro";
       this device.
     </p>
 
-    <h2 class="mt-10 text-xl sm:text-2xl">Add a game</h2>
-    <add-game-form></add-game-form>
+    <h2 class="mt-10 text-xl sm:text-2xl">Currently playing</h2>
+    <playing-dashboard></playing-dashboard>
 
-    <h2 class="mt-12 text-xl sm:text-2xl">Currently playing</h2>
-    <playing-list></playing-list>
+    <h2 class="mt-12 text-xl sm:text-2xl">Add a game</h2>
+    <add-game-form></add-game-form>
 
     <h2 class="mt-12 text-xl sm:text-2xl">Your backlog</h2>
     <backlog-list></backlog-list>
@@ -28,7 +28,7 @@ import AppLayout from "../../layouts/AppLayout.astro";
 
 <script>
   import "../../components/AddGameForm";
-  import "../../components/PlayingList";
+  import "../../components/PlayingDashboard";
   import "../../components/BacklogList";
   import "../../components/HistoryList";
 </script>
