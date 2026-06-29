@@ -10,6 +10,10 @@ const CHANGE_EVENTS = [
   'status-changed',
 ] as const;
 
+/** Active-game count at or above which [Start Playing] shows a friction warning
+ *  before starting, rather than starting immediately (#14). "Active" = playing. */
+const ACTIVE_WARNING_THRESHOLD = 3;
+
 /** In-progress edit values, captured from the live DOM across re-renders. */
 type EditDraft = { title: string; platforms: string[] };
 
@@ -17,7 +21,9 @@ type EditDraft = { title: string; platforms: string[] };
 type PendingFocus =
   | { kind: 'reorder'; id: string; action: 'up' | 'down' }
   | { kind: 'edit'; id: string } // the title input, on entering edit mode
-  | { kind: 'editButton'; id: string }; // the [Edit] button, on exiting it
+  | { kind: 'editButton'; id: string } // the [Edit] button, on exiting it
+  | { kind: 'confirmStart'; id: string } // [Continue Anyway], on opening the warning
+  | { kind: 'startButton'; id: string }; // [Start Playing], on cancelling it
 
 /**
  * `<backlog-list>` — the core backlog view (M2). Renders every `backlog`
@@ -34,7 +40,11 @@ type PendingFocus =
  * Scope note: the row renders [Start Playing] | [Edit] | [Remove].
  * [Start Playing] flips the game's status to "playing" and stamps `dateStarted`
  * at the moment of the click, then fires `status-changed` so the row leaves the
- * queue immediately and the playing view (M4) can pick it up (#10). [Edit]
+ * queue immediately and the playing view (M4) can pick it up (#10) — unless
+ * {@link ACTIVE_WARNING_THRESHOLD} or more games are already active, in which
+ * case it first shows an inline friction warning in place of the row's controls
+ * ([Continue Anyway] starts anyway, [Cancel] keeps the game in the backlog) so
+ * the app discourages, without blocking, piling up active games (#14). [Edit]
  * transforms the row into an inline edit form (#8); [Remove] opens a
  * `<dialog role="alertdialog">` confirmation before deleting (#9).
  */
@@ -44,6 +54,13 @@ class BacklogList extends HTMLElement {
 
   /** The single row currently in edit mode, by `UserGame.id`, or null. */
   private editingId: string | null = null;
+
+  /** The single row showing its [Start Playing] friction warning, by
+   *  `UserGame.id`, or null. Only one warns at a time. */
+  private warningId: string | null = null;
+
+  /** The active-game count captured when the warning opened, shown in its text. */
+  private warningCount = 0;
 
   /** Reusable confirmation dialog (lazily built, kept in `document.body` so the
    *  list's `innerHTML` re-renders can never wipe or move it). */
@@ -69,7 +86,13 @@ class BacklogList extends HTMLElement {
     // Save is a submit button, handled in onSubmit (so Enter works too).
     switch (button.dataset.action) {
       case 'start':
-        this.startPlaying(id);
+        this.requestStart(id);
+        break;
+      case 'confirm-start':
+        this.performStart(id);
+        break;
+      case 'cancel-start':
+        this.cancelStart(id);
         break;
       case 'up':
         this.move(id, -1);
@@ -100,11 +123,16 @@ class BacklogList extends HTMLElement {
     if (id) this.saveEdit(id);
   };
 
-  /** Escape cancels the open edit form. */
+  /** Escape cancels the open edit form, or the open friction warning. */
   private readonly onKeydown = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape' || this.editingId === null) return;
-    event.preventDefault();
-    this.cancelEdit(this.editingId);
+    if (event.key !== 'Escape') return;
+    if (this.editingId !== null) {
+      event.preventDefault();
+      this.cancelEdit(this.editingId);
+    } else if (this.warningId !== null) {
+      event.preventDefault();
+      this.cancelStart(this.warningId);
+    }
   };
 
   connectedCallback() {
@@ -161,12 +189,43 @@ class BacklogList extends HTMLElement {
     document.dispatchEvent(new CustomEvent('game-updated'));
   }
 
+  /** [Start Playing] entry point (#14). The app discourages — but never blocks —
+   *  piling up active games: if {@link ACTIVE_WARNING_THRESHOLD} or more are
+   *  already "playing", show an inline friction warning in this row instead of
+   *  starting, leaving the user to [Continue Anyway] or [Cancel]. Below the
+   *  threshold it starts immediately, no warning. */
+  private requestStart(id: string) {
+    const state = loadState();
+    const playingCount = state.userGames.filter(
+      (ug) => ug.status === 'playing',
+    ).length;
+
+    if (playingCount >= ACTIVE_WARNING_THRESHOLD) {
+      this.warningId = id;
+      this.warningCount = playingCount;
+      this.pendingFocus = { kind: 'confirmStart', id };
+      this.render(); // nothing persisted yet — render directly, not via an event
+      return;
+    }
+    this.performStart(id);
+  }
+
+  /** Dismiss the friction warning without starting; the game stays in the
+   *  backlog and focus returns to its [Start Playing] button. */
+  private cancelStart(id: string) {
+    this.warningId = null;
+    this.warningCount = 0;
+    this.pendingFocus = { kind: 'startButton', id };
+    this.render();
+  }
+
   /** Move a backlog game into "playing": flip its status and stamp `dateStarted`
    *  at the moment of the click (never on load), persist, then announce
    *  `status-changed`. The list re-renders off that event and drops the row
    *  (it no longer matches `status === 'backlog'`); the playing view (M4) is the
-   *  other listener. No confirmation — starting is cheap and reversible. */
-  private startPlaying(id: string) {
+   *  other listener. Reached either directly (below the threshold) or via the
+   *  warning's [Continue Anyway]. */
+  private performStart(id: string) {
     const state = loadState();
     const userGame = state.userGames.find((ug) => ug.id === id);
     if (!userGame) return; // row vanished underneath us — nothing to do
@@ -175,6 +234,9 @@ class BacklogList extends HTMLElement {
     userGame.dateStarted = new Date().toISOString();
     saveState(state);
 
+    // Clear any warning we were showing for this row before it leaves the queue.
+    this.warningId = null;
+    this.warningCount = 0;
     document.dispatchEvent(
       new CustomEvent('status-changed', {
         detail: { id: userGame.id, newStatus: 'playing' },
@@ -342,6 +404,8 @@ class BacklogList extends HTMLElement {
       this.innerHTML =
         '<p class="backlog-empty">Your backlog is empty. Add a game to get started.</p>';
       this.editingId = null;
+      this.warningId = null;
+      this.warningCount = 0;
       this.pendingFocus = null;
       return;
     }
@@ -385,13 +449,13 @@ class BacklogList extends HTMLElement {
         ? `<button type="button" class="btn-icon" data-action="down" aria-label="Move ${safeTitle} down">↓</button>`
         : '';
 
-    return `
-      <li class="backlog-item card" data-id="${escapeHtml(userGame.id)}">
-        <div class="backlog-item-main">
-          <p class="backlog-title">${safeTitle}</p>
-          ${platformsBlock}
-          <p class="backlog-added">${escapeHtml(relativeAdded(userGame.dateAdded))}</p>
-        </div>
+    // While this row is warning (too many active games), its controls give way
+    // to the inline friction prompt — the same "swap the action region" idiom
+    // the history list uses for its restore confirmation.
+    const controls =
+      userGame.id === this.warningId
+        ? this.warningBanner(this.warningCount)
+        : `
         <div class="backlog-controls">
           <div class="backlog-reorder">${moveUp}${moveDown}</div>
           <div class="backlog-actions">
@@ -399,8 +463,38 @@ class BacklogList extends HTMLElement {
             <button type="button" class="btn btn-secondary" data-action="edit">Edit</button>
             <button type="button" class="btn btn-secondary" data-action="remove">Remove</button>
           </div>
+        </div>`;
+
+    return `
+      <li class="backlog-item card" data-id="${escapeHtml(userGame.id)}">
+        <div class="backlog-item-main">
+          <p class="backlog-title">${safeTitle}</p>
+          ${platformsBlock}
+          <p class="backlog-added">${escapeHtml(relativeAdded(userGame.dateAdded))}</p>
         </div>
+        ${controls}
       </li>`;
+  }
+
+  /** The inline friction warning (#14), shown in place of a row's controls when
+   *  the user tries to start a game while {@link ACTIVE_WARNING_THRESHOLD}+ are
+   *  already active. Not a modal — it renders right in the backlog row. The ⚠
+   *  glyph and the wording carry the warning, never colour alone (the CLAUDE.md
+   *  invariant); `role="alert"` announces it when it appears. [Continue Anyway]
+   *  starts the game regardless; [Cancel] leaves it in the backlog. `count` is a
+   *  number (≥ the threshold), so it needs no escaping. */
+  private warningBanner(count: number): string {
+    return `
+        <div class="backlog-warning" role="group" aria-label="Too many active games">
+          <p class="backlog-warning-msg" role="alert">
+            <span class="backlog-warning-icon" aria-hidden="true">⚠</span>
+            <span>You already have ${count} games active. Starting another is allowed, but this app works best when you finish one first.</span>
+          </p>
+          <div class="backlog-warning-actions">
+            <button type="button" class="btn btn-primary" data-action="confirm-start">Continue Anyway</button>
+            <button type="button" class="btn btn-secondary" data-action="cancel-start">Cancel</button>
+          </div>
+        </div>`;
   }
 
   /** The same row, transformed into an inline edit form (#8). Pre-filled from
@@ -502,6 +596,14 @@ class BacklogList extends HTMLElement {
     }
     if (focus.kind === 'editButton') {
       row.querySelector<HTMLElement>('[data-action="edit"]')?.focus();
+      return;
+    }
+    if (focus.kind === 'confirmStart') {
+      row.querySelector<HTMLElement>('[data-action="confirm-start"]')?.focus();
+      return;
+    }
+    if (focus.kind === 'startButton') {
+      row.querySelector<HTMLElement>('[data-action="start"]')?.focus();
       return;
     }
     // Reorder: the button may have vanished (e.g. ↑ on the new first row) — fall
