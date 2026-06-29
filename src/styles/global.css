@@ -527,6 +527,96 @@
     gap: 8px;
   }
 
+  /* Post-completion ceremony (#15) — replaces a playing card in place when the
+     user marks it complete or drops it. Both steps live in the DOM at once as
+     separate <section>s; only the active one shows, toggled by data-step (CSS
+     display, never JS fiddling). Step 1 confirms the outcome and takes an
+     optional rating; step 2 is the "What's next?" picker. The outcome is carried
+     by the headline wording, never colour — the left rail is neutral/decorative. */
+  .ceremony-card {
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+    border-left: 3px solid var(--color-line-strong);
+  }
+  .ceremony-card[data-step="1"] .ceremony-step-2 {
+    display: none;
+  }
+  .ceremony-card[data-step="2"] .ceremony-step-1 {
+    display: none;
+  }
+  .ceremony-step {
+    display: grid;
+    gap: 16px;
+  }
+  /* Standalone buttons stay their natural width rather than stretching the grid. */
+  .ceremony-rating-form > .btn,
+  .ceremony-step-2 > .btn {
+    justify-self: start;
+  }
+  .ceremony-headline {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
+  }
+  .ceremony-rating-form {
+    display: grid;
+    gap: 16px;
+  }
+  .ceremony-rating-field {
+    display: grid;
+    gap: 7px;
+  }
+  .ceremony-rating-field label {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .ceremony-rating-field .field-optional {
+    font-weight: 400;
+    color: var(--color-ink-muted);
+  }
+  .ceremony-rating-field input[type="number"] {
+    width: 7rem;
+    min-height: 46px;
+    padding: 11px 13px;
+    font: inherit;
+    color: var(--color-ink);
+    background-color: var(--color-elevated);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-chip);
+  }
+  .ceremony-next-heading {
+    font-size: 1.125rem; /* 18px */
+  }
+  .ceremony-next-list {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .ceremony-next-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-chip);
+  }
+  .ceremony-next-title {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .ceremony-next-empty {
+    margin: 0;
+    font-size: 0.875rem; /* 14px */
+    color: var(--color-ink-dim);
+  }
+
   /* History list (M3) — rendered by <history-list> into light DOM, like the
      backlog and playing lists, so these classes (not Tailwind utilities in the
      .ts file) carry its styling. Each completed/dropped game is a card showing a
